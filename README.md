@@ -9,7 +9,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的库，可
 <br>
 模块定义
 ----
-<b>库中定义了9个类：</b>
+<b>库中定义了9个类：</b><br>
 * Num：分析数值运算类，位于num模块。
 * NumItem：分析数组类，位于numitem模块。
 * LSym：LaTeX符号生成类，位于lsym模块。
@@ -20,7 +20,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的库，可
 * Measure：测量类，位于uncertainty.measure模块。
 * Uncertainty：不确定度类，位于uncertainty.unc模块。
 <br>
-<b>7个函数模块：</b>
+<b>7个函数模块：</b><br>
 * amath：对数值、符号、测量的求根、对数、三角函数运算。
 * twoitems：两组数据的数理统计。
 * outlier：离群值处理。
