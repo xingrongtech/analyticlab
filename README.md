@@ -31,6 +31,15 @@ analyticlab是一个实验数据计算、分析和计算过程展示的库，可
 
 类的主要功能和绝大多数函数支持process（显示计算过程），通过在调用类方法或函数时，附加参数`process=True`，将得到的计算过程传递给LaTeX公式集类，并通过调用公式集的`show()`方法来实现。哪些类方法和函数支持process，可以通过help函数查询其说明文档。注意计算过程是以LaTeX格式输出的，因此只有在Jupyter Notebook环境下，才能显示计算过程。
 
+如何安装
+----
+1.通过pip安装：
+* `pip install analyticlab`
+2.在pypi上下载analyticlab源代码并安装：
+* 打开网址https://pypi.python.org/analyticlab[https://pypi.python.org/analyticlab]，下载tar.gz文件
+* 解压tar.gz文件到本地，通过cd指令切换到解压的文件夹内
+* 通过`python setup.py install`实现安装
+
 运行环境
 ----
 analyticlab只能在Python 3.x环境下运行，不支持Python 2.x环境。要求系统已安装scipy库。可以在绝大多数Python平台下运行，但计算过程只有在Jupyter Notebook环境下才能显示出来。
