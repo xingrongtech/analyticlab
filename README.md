@@ -35,6 +35,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的库，可
 ----
 1.通过pip安装：
 * `pip install analyticlab`
+
 2.在pypi上下载analyticlab源代码并安装：
 * 打开网址https://pypi.python.org/analyticlab[https://pypi.python.org/analyticlab]，下载tar.gz文件
 * 解压tar.gz文件到本地，通过cd指令切换到解压的文件夹内
