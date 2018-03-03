@@ -41,6 +41,19 @@ analyticlab是一个实验数据计算、分析和计算过程展示的Python库
 * 通过download下载tar.gz文件，解压到本地，通过cd指令切换到解压的文件夹内
 * 通过`python setup.py install`实现安装
 
+如何更新版本
+----
+1.通过pip更新版本：
+* `pip install analyticlab --upgrade`
+如果更新失败，可以尝试先卸载旧版本，在安装新版本：
+* `pip uninstall analyticlab`
+* `pip install analyticlab`
+
+2.在pypi上下载新版analyticlab源代码并更新：
+* 打开网址https://pypi.python.org/pypi/analyticlab
+* 通过download下载tar.gz文件，解压到本地，通过cd指令切换到解压的文件夹内
+* 通过`python setup.py install`实现新版本的安装
+
 运行环境
 ----
 analyticlab只能在Python 3.x环境下运行，不支持Python 2.x环境。要求系统已安装scipy库。可以在绝大多数Python平台下运行，但计算过程只有在Jupyter Notebook环境下才能显示出来。
