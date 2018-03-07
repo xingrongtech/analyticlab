@@ -5,6 +5,7 @@ Created on Wed Feb  7 13:10:41 2018
 @author: wzv100
 """
 import math
+from analyticlab.system.numberformat import dec2Latex
 
 class Const():
     '''Const为常数类，通过该类定义的常数，可以在数值运算、LaTeX符号运算、符号显示中使用。'''
@@ -24,14 +25,6 @@ class Const():
     初始符号：6
     '''
     
-    def __bracket(bId):
-        if bId == 0:
-            return r'\left(%s\right)'
-        elif bId == 1:
-            return r'\left[%s\right]'
-        elif bId >= 2:
-            return r'\left \{%s\right \}'
-    
     def __init__(self, sym, value):
         '''初始化一个Const常数
         【参数说明】
@@ -42,6 +35,14 @@ class Const():
         '''
         self.__symText = sym
         self.__value = value
+
+    def __bracket(self, bId):
+        if bId == 0:
+            return r'\left(%s\right)'
+        elif bId == 1:
+            return r'\left[%s\right]'
+        elif bId >= 2:
+            return r'\left \{%s\right \}'
         
     def __newInstance(self, symText, value, prior, brac):
         new = Const(symText, value)
@@ -73,25 +74,27 @@ class Const():
         symText = self.__symText
         if type(obj) in (int, float, Const) and 1 == self.__prior:
             brac += 1
-            symText = Const.__bracket(brac) % symText
+            symText = self.__bracket(brac) % symText
         symText = '-' + self.__symText
         return self.__newInstance(symText, -self.__value, 1, self.__brac)
     
     def __add__(self, obj):
         brac = self.__brac
-        symText = '%s+%s' % (self.__symText, obj)
         if type(obj) == int or type(obj) == float:
+            symText = '%s+%s' % (self.__symText, dec2Latex(obj))
             return self.__newInstance(symText, self.__value + obj, 1, brac)
         elif type(obj) == Const:
+            symText = '%s+%s' % (self.__symText, obj)
             return self.__newInstance(symText, self.__value + obj.__value, 1, max(brac, obj.__brac))
         else:
             return obj.__radd__(self)
         
     def __radd__(self, obj):
-        symText = '%s+%s' % (obj, self.__symText)
         if type(obj) == int or type(obj) == float:
+            symText = '%s+%s' % (dec2Latex(obj), self.__symText)
             return self.__newInstance(symText, obj + self.__value, 1, self.__brac)
         elif type(obj) == Const:
+            symText = '%s+%s' % (obj, self.__symText)
             return self.__newInstance(symText, obj.__value + self.__value, 1, max(obj.__brac, self.__brac))
         else:
             return obj.__add__(self)
@@ -102,11 +105,12 @@ class Const():
             osymText = obj.__symText
         if type(obj) == Const and 1 == obj.__prior:
             obrac += 1
-            osymText = Const.__bracket(obrac) % osymText
-        symText = '%s-%s' % (self.__symText, obj)
+            osymText = self.__bracket(obrac) % osymText
         if type(obj) == int or type(obj) == float:
+            symText = '%s-%s' % (self.__symText, dec2Latex(obj))
             return self.__newInstance(symText, self.__value - obj, 1, self.__brac)
         elif type(obj) == Const:
+            symText = '%s-%s' % (self.__symText, obj)
             return self.__newInstance(symText, self.__value - obj.__value, 1, max(self.__brac, obrac))
         else:
             return obj.__rsub__(self)
@@ -116,11 +120,12 @@ class Const():
         symText = self.__symText
         if type(obj) in (int, float, Const) and 1 == self.__prior:  
             brac += 1
-            symText = Const.__bracket(brac) % symText
-        symText = '%s-%s' % (obj, symText)
+            symText = self.__bracket(brac) % symText
         if type(obj) == int or type(obj) == float:
+            symText = '%s-%s' % (dec2Latex(obj), symText)
             return self.__newInstance(symText, obj - self.__value, 1, brac)
         elif type(obj) == Const:
+            symText = '%s-%s' % (obj, symText)
             return self.__newInstance(symText, obj.__value - self.__value, 1, max(obj.__brac, brac))
         else:
             return obj.__sub__(self)
@@ -133,12 +138,12 @@ class Const():
             osymText = obj.__symText
         if type(obj) in (int, float, Const) and 2 > self.__prior:
             brac += 1
-            symText = Const.__bracket(brac) % symText
+            symText = self.__bracket(brac) % symText
         if type(obj) == Const and 2 > obj.__prior:
             obrac += 1
-            osymText = Const.__bracket(obrac) % osymText
+            osymText = self.__bracket(obrac) % osymText
         if type(obj) == int or type(obj) == float:
-            symText = r'%s \cdot %s' % (symText, obj)
+            symText = r'%s \cdot %s' % (symText, dec2Latex(obj))
             return self.__newInstance(symText, self.__value * obj, 2, brac)
         elif type(obj) == Const:
             if obj.__isUt1e or obj.__isT1e:
@@ -157,12 +162,12 @@ class Const():
             osymText = obj.__symText
         if type(obj) in (int, float, Const) and 2 > self.__prior:
             brac += 1
-            symText = Const.__bracket(brac) % symText
+            symText = self.__bracket(brac) % symText
         if type(obj) == Const and 2 > obj.__prior:
             obrac += 1
-            osymText = Const.__bracket(obrac) % osymText
+            osymText = self.__bracket(obrac) % osymText
         if type(obj) == int or type(obj) == float:
-            symText = r'%s %s' % (obj, symText)
+            symText = r'%s %s' % (dec2Latex(obj), symText)
             return self.__newInstance(symText, obj * self.__value, 2, brac)
         elif type(obj) == Const:
             if obj.__isUt1e or obj.__isT1e:
@@ -174,19 +179,21 @@ class Const():
             return obj.__mul__(self)
         
     def __truediv__(self, obj):
-        symText = r'\cfrac{%s}{%s}' % (self.__symText, obj)
         if type(obj) == int or type(obj) == float:
+            symText = r'\cfrac{%s}{%s}' % (self.__symText, dec2Latex(obj))
             return self.__newInstance(symText, self.__value / obj, 2, self.__brac)
         elif type(obj) == Const:
+            symText = r'\cfrac{%s}{%s}' % (self.__symText, obj)
             return self.__newInstance(symText, self.__value / obj.__value, 2, max(self.__brac, obj.__brac))
         else:
             return obj.__rtruediv__(self)
         
     def __rtruediv__(self, obj):
-        symText = r'\cfrac{%s}{%s}' % (obj, self.__symText)
         if type(obj) == int or type(obj) == float:
+            symText = r'\cfrac{%s}{%s}' % (dec2Latex(obj), self.__symText)
             return self.__newInstance(symText, obj / self.__value, 2, self.__brac)
         elif type(obj) == Const:
+            symText = r'\cfrac{%s}{%s}' % (obj, self.__symText)
             return self.__newInstance(symText, obj.__value / self.__value, 2, max(obj.__brac, self.__brac))
         else:
             return obj.__truediv__(self)
@@ -200,15 +207,16 @@ class Const():
         #/式除号，考虑prior
         if type(obj) in (int, float, Const) and 2 > self.__prior:
             brac += 1
-            symText = Const.__bracket(brac) % symText
+            symText = self.__bracket(brac) % symText
         #右除需要考虑obj除号
         if type(obj) == Const and 2 >= obj.__prior:
             obrac += 1
-            osymText = Const.__bracket(obrac) % osymText
-        symText = r'%s/%s' % (symText, obj)
+            osymText = self.__bracket(obrac) % osymText
         if type(obj) == int or type(obj) == float:
+            symText = r'%s/%s' % (symText, dec2Latex(obj))
             return self.__newInstance(symText, self.__value / obj, 2, brac)
         elif type(obj) == Const:
+            symText = r'%s/%s' % (symText, obj)
             return self.__newInstance(symText, self.__value / obj.__value, 2, max(brac, obrac))
         else:
             return obj.__rfloordiv__(self)
@@ -223,14 +231,15 @@ class Const():
         #左除需要考虑self除号
         if type(obj) in (int, float, Const) and 2 >= self.__prior:  #左除需要考虑self除号
             brac += 1
-            symText = Const.__bracket(brac) % symText
+            symText = self.__bracket(brac) % symText
         if type(obj) == Const and 2 > obj.__prior:
             obrac += 1
-            osymText = Const.__bracket(obrac) % osymText
-        symText = r'%s/%s' % (obj, symText)
+            osymText = self.__bracket(obrac) % osymText
         if type(obj) == int or type(obj) == float:
+            symText = r'%s/%s' % (dec2Latex(obj), symText)
             return self.__newInstance(symText, obj / self.__value, 2, brac)
         elif type(obj) == Const:
+            symText = r'%s/%s' % (obj, symText)
             return self.__newInstance(symText, obj.__value / self.__value, 2, max(obrac, brac))
         else:
             return obj.__floordiv__(self)
@@ -240,20 +249,22 @@ class Const():
         symText = self.__symText
         if type(b) in (int, float, Const) and 3 >= self.__prior:
             brac += 1
-            symText = Const.__bracket(brac) % symText
-        symText = r'{%s}^{%s}' % (symText, b)
+            symText = self.__bracket(brac) % symText
         if type(b) == int or type(b) == float:
+            symText = r'{%s}^{%g}' % (symText, b)
             return self.__newInstance(symText, self.__value**b, 3, brac)
         elif type(b) == Const:
+            symText = r'{%s}^{%s}' % (symText, b)
             return self.__newInstance(symText, self.__value**b.__value, 3, max(brac, b.__brac))
         else:
             return b.__rpow__(self)
         
     def __rpow__(self, a):
-        symText = r'{%s}^{%s}' % (a, self.__symText)
         if type(a) == int or type(a) == float:
+            symText = r'{%s}^{%s}' % (dec2Latex(a), self.__symText)
             return Const(symText, a**self.__value, 3, self.__brac)
         elif type(a) == Const:
+            symText = r'{%s}^{%s}' % (a, self.__symText)
             return Const(symText, a.__value**self.__value, max(a.__brac, self.__brac))
         else:
             return a.__pow__(self)

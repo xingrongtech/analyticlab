@@ -112,18 +112,18 @@ def dispLSymItem(lSymItem, resSym, resUnit=None, headExpr='根据公式$%s$，�
             latex.add(mitem.mean(process=True))
     return latex
             
-def dispUnc(measures, resUnc, resValue, resSym, resUnit, resDescription=None):
+def dispUnc(resUnc, resValue, resSym, resUnit, resDescription=None):
     '''输出不确定度
     【参数说明】
-    1.measures（list<Measure>）：由构成不确定度的全部测量（Measure）组成的数组。
-    2.resUnc（Uncertainty或Measure）：最终测量结果的不确定度。
-    3.resValue（Num）：最终测量结果的数值。
-    4.resSym（str）：最终测量结果的符号。
-    5.resUnit（str）：最终测量结果的单位。
-    6.resDescription（可选，str）：对最终测量结果的描述。默认resDescription=None。
+    1.resUnc（Uncertainty或Measure）：最终测量结果的不确定度。
+    2.resValue（Num）：最终测量结果的数值。
+    3.resSym（str）：最终测量结果的符号。
+    4.resUnit（str）：最终测量结果的单位。
+    5.resDescription（可选，str）：对最终测量结果的描述。默认resDescription=None。
     【返回值】
     LaTeX：表格的公式集。'''
     latex = LaTeX()
+    measures = [mi[0] for mi in resUnc._Uncertainty__measures.values()]
     for i in range(len(measures)):
         latex.add(r'(%d)\text{对于%s：}' % (i+1, measures[i]._Measure__description))
         latex.add(measures[i].unc(process=True))
@@ -133,10 +133,13 @@ def dispUnc(measures, resUnc, resValue, resSym, resUnit, resDescription=None):
     latex.add(r'\text{计算合成不确定度：}')
     if res['isRate']:
         uncValue = res['unc']._Num__getRelative(dec=True) * resValue
-        latex.add(r'\frac{u_{%s}}{%s}=%s=%s=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
+        latex.add(r'\frac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
         latex.add(r'u_{%s}=\frac{u_{%s}}{%s}\cdot %s=%s\times %s=%s{\rm %s}' % (resSym, resSym, resSym, resSym, res['unc'].latex(), resValue.latex(), uncValue.latex(), resUnit))
     else:
-        latex.add(r'u_{%s}=%s=%s=%s{\rm %s}' % (resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex(), resUnit))
+        #给出不确定度计算定义式
+        pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._Measure__sym, mi[0]._Measure__sym) for mi in res['measures'].values()])
+        pExpr = r'\sqrt{%s}' % pExpr
+        latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s{\rm %s}' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex(), resUnit))
     des = ''
     eqNum = resValue
     if res['isRate']:

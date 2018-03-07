@@ -5,6 +5,7 @@ Created on Tue Feb  6 20:04:16 2018
 @author: xingrongtech
 """
 
+from sympy import Symbol
 from analyticlab import amath
 from analyticlab.num import Num
 from analyticlab.numitem import NumItem
@@ -18,7 +19,7 @@ class Measure(unc.Uncertainty):
     '''Measure为测量类，该类通过给出一组直接测量的数据以及测量该数据所使用的仪器，从而计算单个测量的标准不确定度。'''
     AMethod = 'auto'  #静态属性，控制A类不确定度如何计算
     
-    __data = __instrument = __sym = __AMethod = __unit = __uA = __value = __description = None
+    __value = None
     
     def __init__(self, data, instrument=None, sym=None, unit=None, description=None):
         '''初始化一个Measure测量
@@ -102,8 +103,13 @@ class Measure(unc.Uncertainty):
                 self.__sym = self.__data._NumItem__sym
             else:
                 self.__sym = '{' + sym + '}'
+                self.__data._NumItem__sym = self.__sym
         else:
             self.__sym = '{' + sym + '}'
+        self._Uncertainty__symbol = Symbol(self.__sym)
+        self._Uncertainty__measures = {}
+        self._Uncertainty__lsyms = {}
+        self._Uncertainty__consts = {}
     
     def unc(self, process=False, needValue=False):
         '''获得标准不确定度

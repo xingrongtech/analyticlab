@@ -5,7 +5,7 @@ Created on Sat Feb 10 08:34:23 2018
 @author:xingrongtech
 """
 
-import math
+import math, sympy
 import analyticlab.system.numberformat as nf
 
 def sqrt(obj, root=2):
@@ -59,12 +59,10 @@ def sqrt(obj, root=2):
         else:
             return obj._Const__newInstance(r'\sqrt[%d]{%s}' % (root, obj._Const__symText), math.sqrt(obj.value()), 4, obj._Const__brac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
-        calId = 7
-        equ = sqrt(obj.equ(), root)
-        equLSym = None
-        if obj._Uncertainty__process():
-            equLSym = sqrt(obj._Uncertainty__equLSym())
-        return obj._Uncertainty__execute(calId, equ, equLSym, root)
+        if root == 2:
+            return obj._Uncertainty__newInstance(sympy.sqrt(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
+        else:
+            return obj._Uncertainty__newInstance(obj._Uncertainty__symbol**sympy.Rational(1,root), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
     
 def ln(obj):
     '''ln对数计算
@@ -130,12 +128,7 @@ def ln(obj):
             osymText = obj._Const__bracket(obrac) % osymText
         return obj._Const__newInstance(r'\ln %s' % osymText, math.log(obj.value()), 5, obrac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
-        calId = 9
-        equ = ln(obj.equ())
-        equLSym = None
-        if obj._Uncertainty__process():
-            equLSym = ln(obj.equLSym())
-        return obj._Uncertainty__execute(calId, equ, equLSym)
+        return obj._Uncertainty__newInstance(sympy.ln(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
     
 def lg(obj):
     '''lg对数计算
@@ -201,12 +194,7 @@ def lg(obj):
             osymText = obj._Const__bracket(obrac) % osymText
         return obj._Const__innerCreate(r'\lg{%s}' % osymText, math.log10(n.value()), 5, obrac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
-        calId = 10
-        equ = lg(obj.equ())
-        equLSym = None
-        if obj._Uncertainty__process():
-            equLSym = lg(obj.equLSym())
-        return obj._Uncertainty__execute(calId, equ, equLSym)
+        return obj._Uncertainty__newInstance(sympy.log(obj._Uncertainty__symbol, 10), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
     
 def __triFunc(obj, fun, selfFun, funExpr, mode):
     objType = str(type(obj))

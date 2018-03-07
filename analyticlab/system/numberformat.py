@@ -52,4 +52,16 @@ def getDigitBehind(usign, digit_valid, digit_front):
     return digit_behind
 
 def getBound(num):
-	return fabs(floor(log10(fabs(num._Num__num * 1.00000000001))))
+    '''获得数字的科学记数法指数'''
+    return fabs(floor(log10(fabs(num._Num__num * 1.00000000001))))
+
+def dec2Latex(dec):
+    decStr = '%g' % dec
+    if len(decStr) >= 16:
+        bound = floor(log10(fabs(dec * 1.00000000001)))
+        if dec >= 1:
+            return '%.2f' % dec
+        else:
+            return ('%.' + (bound+2) + 'f') % dec
+    else:
+        return decStr
