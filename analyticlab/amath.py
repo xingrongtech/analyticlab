@@ -60,9 +60,9 @@ def sqrt(obj, root=2):
             return obj._Const__newInstance(r'\sqrt[%d]{%s}' % (root, obj._Const__symText), math.sqrt(obj.value()), 4, obj._Const__brac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
         if root == 2:
-            return obj._Uncertainty__newInstance(sympy.sqrt(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
+            return obj._Uncertainty__newInstance(sympy.sqrt(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
         else:
-            return obj._Uncertainty__newInstance(obj._Uncertainty__symbol**sympy.Rational(1,root), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
+            return obj._Uncertainty__newInstance(obj._Uncertainty__symbol**sympy.Rational(1,root), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
     
 def ln(obj):
     '''ln对数计算
@@ -128,7 +128,7 @@ def ln(obj):
             osymText = obj._Const__bracket(obrac) % osymText
         return obj._Const__newInstance(r'\ln %s' % osymText, math.log(obj.value()), 5, obrac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
-        return obj._Uncertainty__newInstance(sympy.ln(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
+        return obj._Uncertainty__newInstance(sympy.ln(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
     
 def lg(obj):
     '''lg对数计算
@@ -194,7 +194,7 @@ def lg(obj):
             osymText = obj._Const__bracket(obrac) % osymText
         return obj._Const__innerCreate(r'\lg{%s}' % osymText, math.log10(n.value()), 5, obrac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
-        return obj._Uncertainty__newInstance(sympy.log(obj._Uncertainty__symbol, 10), obj._Uncertainty__measures, obj._Uncertainty__consts, False)
+        return obj._Uncertainty__newInstance(sympy.log(obj._Uncertainty__symbol, 10), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
     
 def __triFunc(obj, fun, selfFun, funExpr, mode):
     objType = str(type(obj))
