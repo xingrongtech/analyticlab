@@ -38,7 +38,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的Python库
 
 2.通过pip更新版本：
 * `pip install analyticlab --upgrade`
-<br>如果更新失败，可以尝试先卸载旧版本，在安装新版本：
+<br>如果更新失败，可以尝试先卸载旧版本，再安装新版本：
 * `pip uninstall analyticlab`
 * `pip install analyticlab`
 
