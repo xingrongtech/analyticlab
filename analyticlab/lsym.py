@@ -5,6 +5,7 @@ Created on Mon Feb  5 15:18:09 2018
 @author: xingrongtech
 """
 
+import sympy
 from analyticlab.num import Num
 from analyticlab.const import Const
 from analyticlab.system.numberformat import dec2Latex
@@ -239,6 +240,14 @@ class LSym():
                 calText = s_calText + '+' + c_symText
                 sNum = self.__sNum + obj.value()
                 calBrac = max(s_calBrac, c_brac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = self.__symText + '+' + sympy.latex(obj)
+                symBrac = self.__symBrac
+            if self.__genCal:
+                calText = s_calText + '+' + sympy.latex(obj)
+                sNum = self.__sNum + float(obj)
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__radd__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 1, 1)
@@ -287,6 +296,14 @@ class LSym():
                 calText = c_symText + '+' + s_calText
                 sNum = obj.value() + self.__sNum
                 calBrac = max(s_calBrac, c_brac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = sympy.latex(obj) + '+' + self.__symText
+                symBrac = self.__symBrac
+            if self.__genCal:
+                calText = sympy.latex(obj) + '+' + s_calText
+                sNum = float(obj) + self.__sNum
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__add__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 1, 1)
@@ -345,6 +362,14 @@ class LSym():
                 calText = s_calText + '-' + c_symText
                 sNum = self.__sNum - obj.value()
                 calBrac = max(s_calBrac, c_brac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = self.__symText + '-' + sympy.latex(obj)
+                symBrac = self.__symBrac
+            if self.__genCal:
+                calText = s_calText + '-' + sympy.latex(obj)
+                sNum = self.__sNum - float(obj)
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__rsub__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 1, 1)
@@ -400,6 +425,14 @@ class LSym():
                 calText = c_symText + '-' + s_calText
                 sNum = obj.value() - self.__sNum
                 calBrac = max(c_brac, s_calBrac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = sympy.latex(obj) + '-' + s_symText
+                symBrac = s_symBrac
+            if self.__genCal:
+                calText = sympy.latex(obj) + '-' + s_calText
+                sNum = float(obj) - self.__sNum
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__sub__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 1, 1)
@@ -473,6 +506,14 @@ class LSym():
                 calText = s_calText + r' \times ' + c_symText
                 sNum = self.__sNum * obj.value()
                 calBrac = max(s_calBrac, c_brac)
+        elif type(obj) == int or type(obj) == float:
+            if self.__genSym:
+                symText = s_symText + r' \cdot ' + sympy.latex(obj)  #与常数相乘，需要点乘号
+                symBrac = s_symBrac
+            if self.__genCal:
+                calText = s_calText + r' \times ' + sympy.latex(obj)
+                sNum = self.__sNum * float(obj)
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__rmul__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, symPrior, 2)
@@ -544,6 +585,14 @@ class LSym():
                 calText = c_symText + r' \times ' + s_calText
                 sNum = obj.value() * self.__sNum
                 calBrac = max(c_brac, s_calBrac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = sympy.latex(obj) + s_symText  #与常数相乘，不需要乘号
+                symBrac = s_symBrac 
+            if self.__genCal:
+                calText = sympy.latex(obj) + r' \times ' + s_calText
+                sNum = float(obj) * self.__sNum
+                calBrac = s_calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__mul__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, symPrior, 2)
@@ -580,6 +629,14 @@ class LSym():
                 calText = r'\cfrac{%s}{%s}' % (self.__calText, c_symText)
                 sNum = self.__sNum / obj.value()
                 calBrac = max(self.__calBrac, c_brac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = r'\cfrac{%s}{%s}' % (self.__symText, sympy.latex(obj))
+                symBrac = self.__symBrac
+            if self.__genCal:
+                calText = r'\cfrac{%s}{%s}' % (self.__calText, sympy.latex(obj))
+                sNum = self.__sNum / float(obj)
+                calBrac = self.__calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__rtruediv__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 2, 2)
@@ -616,6 +673,14 @@ class LSym():
                 calText = r'\cfrac{%s}{%s}' % (c_symText, self.__calText)
                 sNum = obj.value() / self.__sNum
                 calBrac = max(c_brac, self.__calBrac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = r'\cfrac{%s}{%s}' % (sympy.latex(obj), self.__symText)
+                symBrac = self.__symBrac
+            if self.__genCal:
+                calText = r'\cfrac{%s}{%s}' % (sympy.latex(obj), self.__calText)
+                sNum = float(obj) / self.__sNum
+                calBrac = self.__calBrac
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__truediv__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 2, 2)
@@ -681,6 +746,14 @@ class LSym():
                 calText = s_calText + r'/' + c_symText
                 sNum = self.__sNum / obj.value()
                 calBrac = max(s_calBrac, c_brac)
+        elif type(obj) == int or type(obj) == float:
+            if self.__genSym:
+                symText = s_symText + r'/' + sympy.latex(obj)
+                symBrac = s_symBrac
+            if self.__genCal:
+                calText = s_calText + r'/' + sympy.latex(obj)
+                sNum = self.__sNum / float(obj)
+                calBrac = s_calBrac 
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__rfloordiv__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 2, 2)
@@ -746,6 +819,14 @@ class LSym():
                 calText = c_symText + r'/' + s_calText
                 sNum = obj.value() / self.__sNum
                 calBrac = max(c_brac, s_calBrac)
+        elif 'sympy' in str(type(obj)):
+            if self.__genSym:
+                symText = sympy.latex(obj) + r'/' + s_symText
+                symBrac = s_symBrac
+            if self.__genCal:
+                calText = sympy.latex(obj) + r'/' + s_calText
+                sNum = float(obj) / self.__sNum
+                calBrac = s_calBrac  
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             return obj.__floordiv__(self)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 2, 2)
@@ -779,6 +860,8 @@ class LSym():
                     symText = symText[:lId] + '^{' + c_symText + '}' + symText[lId:]
                 elif type(b) == float:
                     symText = symText[:lId] + '^{' + dec2Latex(b) + '}' + symText[lId:]
+                elif 'sympy' in str(type(b)):
+                    symText = symText[:lId] + '^{' + sympy.latex(b) + '}' + symText[lId:]
                 else:
                     symText = symText[:lId] + '^{' + str(b) + '}' + symText[lId:]
             else:
@@ -786,6 +869,8 @@ class LSym():
                     symText = '%s^{%s}' % (s_symText, c_symText)
                 elif type(b) == float:
                     symText = '%s^{%s}' % (s_symText, dec2Latex(b))
+                elif 'sympy' in str(type(b)):
+                    symText = '%s^{%s}' % (s_symText, sympy.latex(b))
                 else:
                     symText = '%s^{%s}' % (s_symText, b)
             if type(b) == Const:
@@ -796,6 +881,9 @@ class LSym():
             if type(b) == Const:
                 sNum = self.__sNum ** b.value()
                 calBrac = max(s_calBrac, c_brac)
+            elif 'sympy' in str(type(b)):
+                sNum = self.__sNum ** float(b)
+                calBrac = s_calBrac
             else:
                 sNum = self.__sNum ** b
                 calBrac = s_calBrac
@@ -808,6 +896,8 @@ class LSym():
                     calText = calText[:lId] + '^{' + c_symText + '}' + calText[lId:]
                 elif type(b) == float:
                     calText = calText[:lId] + '^{' + dec2Latex(b) + '}' + calText[lId:]
+                elif 'sympy' in str(type(b)):
+                    calText = calText[:lId] + '^{' + sympy.latex(b) + '}' + calText[lId:]
                 else:
                     calText = calText[:lId] + '^{' + str(b) + '}' + calText[lId:]
             else:
@@ -815,6 +905,8 @@ class LSym():
                     calText = '%s^{%s}' % (s_calText, c_symText)
                 elif type(b) == float:
                     calText = '%s^{%s}' % (s_calText, dec2Latex(b))
+                elif 'sympy' in str(type(b)):
+                    calText = '%s^{%s}' % (s_calText, sympy.latex(b))
                 else:
                     calText = '%s^{%s}' % (s_calText, b)
         return self.__newInstance(symText, sNum, calText, symBrac, calBrac, 3, 3)
@@ -833,6 +925,9 @@ class LSym():
             elif type(a) == float:
                 symText = '%s^{%s}' % (dec2Latex(a), self.__symText)
                 symBrac = self.__symBrac
+            elif 'sympy' in str(type(a)):
+                symText = '%s^{%s}' % (sympy.latex(a), self.__symText)
+                symBrac = self.__symBrac
             else:
                 symText = '%s^{%s}' % (a, self.__symText)
                 symBrac = self.__symBrac
@@ -844,6 +939,10 @@ class LSym():
             elif type(a) == float:
                 sNum = a ** self.__sNum
                 calText = '%s^{%s}' % (dec2Latex(a), self.__calText)
+                calBrac = self.__calBrac  
+            elif 'sympy' in str(type(a)):
+                sNum = float(a) ** self.__sNum
+                calText = '%s^{%s}' % (sympy.latex(a), self.__calText)
                 calBrac = self.__calBrac  
             else:
                 sNum = a ** self.__sNum

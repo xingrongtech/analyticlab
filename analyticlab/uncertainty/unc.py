@@ -5,8 +5,8 @@ Created on Tue Feb  6 22:21:31 2018
 @author: xingrongtech
 """
 
-import sympy, time
-from sympy import Symbol, diff
+import re, sympy, time
+from sympy import Symbol, diff, Rational
 from analyticlab import amath
 from analyticlab.const import Const
 from analyticlab.lsym import LSym
@@ -207,7 +207,6 @@ class Uncertainty():
             y = self.__symbol
             m = list(self.__measures.values())
             cs, ls = self.__consts, self.__lsyms
-            start = time.clock()
             um0 = Symbol('u_{%s}' % m[0][0]._Measure__sym)
             ssum = diff(y, m[0][0]._Uncertainty__symbol)**2 * um0**2
             for mi in m[1:]:
@@ -217,6 +216,9 @@ class Uncertainty():
             if Uncertainty.simplifyUnc:
                 u = sympy.simplify(u)
             uExpr = str(u)
+            def repRat(matched):
+                return 'Rational%s' % matched.group('rat').replace('/', ',')
+            uExpr = re.sub('(?P<rat>\((-?\d+)(\.\d+)?/(-?\d+)(\.\d+)?\))', repRat, uExpr)
             uExpr = uExpr.replace('log(10)', '2.303')
             uExpr = uExpr.replace('sqrt', 'amath.sqrt')
             for mi in m:
