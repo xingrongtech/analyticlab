@@ -18,7 +18,7 @@ def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=T
     2.sym（可选，str）：符号。默认sym=None。
     3.process（可选，bool）：是否展示计算过程。默认proces=False。
     4.needValue（可选，bool）：当获得计算过程时，是否返回计算结果。默认needValue=False。
-    5.remainOneMoreDigit（可选，bool）：结果是否多保留一位有效数字。默认remainOneMoreDigit=False。
+    5.remainOneMoreDigit（可选，bool）：结果是否多保留一位有效数字。默认remainOneMoreDigit=True。
     【返回值】
     ①process为False时，返回值为Num类型的B类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。

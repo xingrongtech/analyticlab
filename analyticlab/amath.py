@@ -49,7 +49,12 @@ def sqrt(obj, root=2):
         return obj._LSym__newInstance(symText, sNum, calText, symBrac, calBrac, 4, 4)
     elif objType == "<class 'analyticlab.lsymitem.LSymItem'>":
         new = obj._LSymItem__newInstance()
-        new._LSymItem__lsyms = [sqrt(ni, root) for ni in obj._LSymItem__lsyms]
+        if type(obj._LSymItem__lsyms) == list:
+            new._LSymItem__lsyms = [sqrt(ni, root) for ni in obj._LSymItem__lsyms]
+        else:
+            new._LSymItem__lsyms = {}
+            for ki in obj._LSymItem__lsyms.keys():
+                new._LSymItem__lsyms[ki] = sqrt(obj._LSymItem__lsyms[ki], root)
         if obj._LSymItem__sepSymCalc:
             new._LSymItem__sepSym = sqrt(obj._LSymItem__sepSym, root)
         return new
@@ -57,7 +62,7 @@ def sqrt(obj, root=2):
         if root == 2:
             return obj._Const__newInstance(r'\sqrt{%s}' % obj._Const__symText, math.sqrt(obj.value()), 4, obj._Const__brac)
         else:
-            return obj._Const__newInstance(r'\sqrt[%d]{%s}' % (root, obj._Const__symText), math.sqrt(obj.value()), 4, obj._Const__brac)
+            return obj._Const__newInstance(r'\sqrt[%d]{%s}' % (root, obj._Const__symText), obj.value()*(1/root), 4, obj._Const__brac)
     elif objType == "<class 'analyticlab.uncertainty.unc.Uncertainty'>" or objType == "<class 'analyticlab.uncertainty.measure.Measure'>":
         if root == 2:
             return obj._Uncertainty__newInstance(sympy.sqrt(obj._Uncertainty__symbol), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
@@ -116,7 +121,12 @@ def ln(obj):
         return obj._LSym__newInstance(symText, sNum, calText, symBrac, calBrac, 5, 5)
     elif objType == "<class 'analyticlab.lsymitem.LSymItem'>":
         new = obj._LSymItem__newInstance()
-        new._LSymItem__lsyms = [ln(ni) for ni in obj._LSymItem__lsyms]
+        if type(obj._LSymItem__lsyms) == list:
+            new._LSymItem__lsyms = [ln(ni) for ni in obj._LSymItem__lsyms]
+        else:
+            new._LSymItem__lsyms = {}
+            for ki in obj._LSymItem__lsyms.keys():
+                new._LSymItem__lsyms[ki] = ln(obj._LSymItem__lsyms[ki])
         if obj._LSymItem__sepSymCalc:
             new._LSymItem__sepSym = ln(obj._LSymItem__sepSym)
         return new
@@ -182,7 +192,12 @@ def lg(obj):
         return obj._LSym__newInstance(symText, sNum, calText, symBrac, calBrac, 5, 5)
     elif objType == "<class 'analyticlab.lsymitem.LSymItem'>":
         new = obj._LSymItem__newInstance()
-        new._LSymItem__lsyms = [lg(ni) for ni in obj._LSymItem__lsyms]
+        if type(obj._LSymItem__lsyms) == list:
+            new._LSymItem__lsyms = [lg(ni) for ni in obj._LSymItem__lsyms]
+        else:
+            new._LSymItem__lsyms = {}
+            for ki in obj._LSymItem__lsyms.keys():
+                new._LSymItem__lsyms[ki] = lg(obj._LSymItem__lsyms[ki])
         if obj._LSymItem__sepSymCalc:
             new._LSymItem__sepSym = lg(obj._LSymItem__sepSym)
         return new
@@ -235,7 +250,12 @@ def __triFunc(obj, fun, selfFun, funExpr, mode):
         return obj._LSym__newInstance(symText, sNum, calText, symBrac, calBrac, 5, 5)
     elif objType == "<class 'analyticlab.lsymitem.LSymItem'>":
         new = obj._LSymItem__newInstance()
-        new._LSymItem__lsyms = [selfFun(ni) for ni in obj._LSymItem__lsyms]
+        if type(obj._LSymItem__lsyms) == list:
+            new._LSymItem__lsyms = [selfFun(ni) for ni in obj._LSymItem__lsyms]
+        else:
+            new._LSymItem__lsyms = {}
+            for ki in obj._LSymItem__lsyms.keys():
+                new._LSymItem__lsyms[ki] = selfFun(obj._LSymItem__lsyms[ki])
         if obj._LSymItem__sepSymCalc:
             new._LSymItem__sepSym = selfFun(obj._LSymItem__sepSym)
         return new

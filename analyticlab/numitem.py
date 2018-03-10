@@ -24,7 +24,7 @@ class NumItem():
     __gd_valid = 0
     __isRelative = False
     
-    def __init__(self, nums, mu=None, isRelative=False, sym='x', unit=None):
+    def __init__(self, nums, mu=None, isRelative=False, sym='x', unit=None, muSym=r'\mu'):
         '''初始化一个NumItem数组
         【参数说明】
         1.nums：要初始化的数值，可以是str或list：
@@ -34,6 +34,7 @@ class NumItem():
         3.isRelative（可选，bool）：是否为相对比（百分数形式），默认isRelative=False。
         4.sym（可选，str）：符号，默认sym='x'。
         5.unit（可选，str）：单位，默认unit=None，即没有单位。
+        6.muSym（可选，str）：真值μ对应的符号，默认muSym=r'\mu'。
         【应用举例】
         >>> t = NumItem('1.62 1.66 1.58 1.71 1.69')
         >>>
@@ -66,8 +67,12 @@ class NumItem():
             else:
                 raise expressionInvalidException('用于创建数组的参数无效')
         elif str(type(nums)) == "<class 'analyticlab.lsymitem.LSymItem'>":
-            if type(nums._LSymItem__lsyms[0].num()) == Num:
-                self.__arr = [ni.num() for ni in nums._LSymItem__lsyms]
+            if type(nums._LSymItem__lsyms) == list:
+                lsymList = nums._LSymItem__lsyms
+            else:
+                lsymList = list(nums._LSymItem__lsyms.values())
+            if type(lsymList[0].num()) == Num:
+                self.__arr = [ni.num() for ni in lsymList]
             else:
                 raise expressionInvalidException('用于创建数组的参数无效')
         else:
@@ -80,6 +85,7 @@ class NumItem():
                 self.__mu = mu
             else:
                 raise expressionInvalidException('真值参数无效，真值只能以数值或字符串形式给出')
+            self.__muSym = muSym
         if len(self.__arr) > 0:
             self.__findGeneralValid()
         self.__sym = '{' + sym + '}'
@@ -764,9 +770,9 @@ class NumItem():
                 if self.__unit != None:
                     unitExpr = r'{\rm %s}' % self.__unit
                 if len(self.__arr) == 1:
-                    latex.add(r'\text{%s}E=%s-\mu=%s-%s=%s%s' % (description, self.__sym, self.__arr[0].latex(), self.__mu.latex(2), result.__arr[0].latex(), unitExpr))
+                    latex.add(r'\text{%s}E=%s-%s=%s-%s=%s%s' % (description, self.__sym, self.__muSym, self.__arr[0].latex(), self.__mu.latex(2), result.__arr[0].latex(), unitExpr))
                 else:
-                    latex.add(r'\text{根据公式}E_{i}=%s_{i}-\mu，得' % self.__sym)
+                    latex.add(r'\text{根据公式}E_{i}=%s_{i}-%s，得' % (self.__sym, self.__muSym))
                     for i in range(len(self.__arr)):
                         latex.add('E_{%d}=%s-%s=%s%s' % (i+1, self.__arr[i].latex(), self.__mu.latex(2), result.__arr[i].latex(), unitExpr))
                 if needValue:
@@ -775,7 +781,7 @@ class NumItem():
                     return latex
             return result
         except:
-            raise muNotFoundException('缺少真值μ，无法计算绝对误差')
+            raise muNotFoundException('缺少真值，无法计算绝对误差')
     
     def relErr(self, process=False, needValue=False, description=''):
         '''相对误差（relative error）
@@ -796,9 +802,9 @@ class NumItem():
                 muExpr = self.__mu.latex()
                 muExpr2 = self.__mu.latex(2)
                 if len(self.__arr) == 1:
-                    latex.add(r'\text{%s}E_{r}=\frac{\left|%s-\mu\right|}{\mu}\times 100\%%=\frac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (description, self.__sym, self.__arr[0].latex(), muExpr2, muExpr, result.__arr[0].latex()))
+                    latex.add(r'\text{%s}E_{r}=\frac{\left|%s-%s\right|}{%s}\times 100\%%=\frac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (description, self.__sym, self.__muSym, self.__muSym, self.__arr[0].latex(), muExpr2, muExpr, result.__arr[0].latex()))
                 else:
-                    latex.add(r'\text{根据公式}E_{ri}=\frac{\left\lvert %s_{i}-\mu\right\rvert}{\mu}\times 100\%%，得' % self.__sym)
+                    latex.add(r'\text{根据公式}E_{ri}=\frac{\left\lvert %s_{i}-%s\right\rvert}{%s}\times 100\%%，得' % (self.__sym, self.__muSym, self.__muSym))
                     for i in range(len(self.__arr)):
                         latex.add(r'E_{r%d}=\frac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (i+1, self.__arr[i].latex(), muExpr2, muExpr, result.__arr[i].latex()))
                 if needValue:
@@ -807,7 +813,7 @@ class NumItem():
                     return latex
             return result
         except:
-            raise muNotFoundException('缺少真值μ，无法计算相对误差')
+            raise muNotFoundException('缺少真值，无法计算相对误差')
     
     def samConfIntv(self, confLevel=0.95, side='double', process=False, needValue=False):
         '''测量值的置信区间
@@ -903,7 +909,7 @@ class NumItem():
             if process: 
                 p_mean = self.mean()
                 p_s, latex = self.staDevi(process=True, remainOneMoreDigit=True, needValue=True)
-                latex.add(r't=\frac{\left\lvert\overline{%s}-\mu\right\rvert}{s_{%s}/\sqrt{n}}=\frac{\left\lvert%s-%s\right\rvert}{%s/\sqrt{%d}}=%.3f' % (self.__sym, self.__sym, p_mean.latex(), self.__mu.latex(2), p_s.latex(), n, tCal))
+                latex.add(r't=\frac{\left\lvert\overline{%s}-%s\right\rvert}{s_{%s}/\sqrt{n}}=\frac{\left\lvert%s-%s\right\rvert}{%s/\sqrt{%d}}=%.3f' % (self.__sym, self.__muSym, self.__sym, p_mean.latex(), self.__mu.latex(2), p_s.latex(), n, tCal))
                 if side == 'double':
                     latex.add(r'\text{对于双侧区间，}P=1-\frac{\alpha}{2}=%g\text{，查表得n=%d时，}t_{1-\alpha/2}(n-1)=t_{%g}(%d)=%.3f' % (confLevel, n, confLevel, n-1, tv))
                 else:
@@ -924,4 +930,4 @@ class NumItem():
                     return latex
             return tCal >= tv
         except:
-            raise muNotFoundException('缺少真值μ，无法进行准确度分析')
+            raise muNotFoundException('缺少真值，无法进行准确度分析')

@@ -60,7 +60,11 @@ class Measure(unc.Uncertainty):
                     sym = data.sym()
         elif type(data) == LSymItem:
             self.__uA = 'single'
-            self.__data = NumItem([d._LSym__sNum for d in data], sym=data._LSymItem__symText, unit=self.__unit)
+            if type(data._LSymItem__lsyms) == list:
+                dd = data._LSymItem__lsyms
+            else:
+                dd = data._LSymItem__lsyms.values()
+            self.__data = NumItem([d._LSym__sNum for d in dd], sym=data._LSymItem__symText, unit=self.__unit)
         elif type(data) == str:
             isItem = (data.find(' ') >= 0)
             if isItem:
@@ -86,7 +90,11 @@ class Measure(unc.Uncertainty):
             elif type(data[0]) == LSymItem:
                 self.__data = []
                 for i in range(len(data)):
-                    data_i = NumItem([d._LSym__sNum for d in data[i]], sym=data[i]._LSymItem__symText, unit=self.__unit)
+                    if type(data[i]._LSymItem__lsyms) == list:
+                        lsymList = data[i]._LSymItem__lsyms
+                    else:
+                        lsymList = data[i]._LSymItem__lsyms.values()
+                    data_i = NumItem([d._LSym__sNum for d in lsymList], sym=data[i]._LSymItem__symText, unit=self.__unit)
                     self.__data.append(data_i)
             elif type(data[0]) == Num:
                 self.__data = NumItem(data, sym=sym, unit=self.__unit)
@@ -106,34 +114,37 @@ class Measure(unc.Uncertainty):
                 self.__data._NumItem__sym = self.__sym
         else:
             self.__sym = '{' + sym + '}'
-        self._Uncertainty__symbol = Symbol(self.__sym)
+        self._Uncertainty__symbol = Symbol(self.__sym, real=True)
         self._Uncertainty__measures = {}
         self._Uncertainty__lsyms = {}
         self._Uncertainty__consts = {}
     
-    def unc(self, process=False, needValue=False):
+    def unc(self, process=False, needValue=False, remainOneMoreDigit=False):
         '''获得标准不确定度
         【参数说明】
-        process（可选，bool）：是否展示计算过程。默认proces=False。
+        1.process（可选，bool）：是否展示计算过程。默认proces=False。
+        2.needValue（可选，bool）：当获得计算过程时，是否返回计算结果。默认needValue=False。
+        3.remainOneMoreDigit（可选，bool）：结果是否多保留一位有效数字。默认remainOneMoreDigit=False。
         【返回值】
         Num：标准不确定度数值。'''
+        oneMoreDigit = remainOneMoreDigit or (self.__uA != None and self.__instrument != None)
         if self.__uA != None:  #判断是否需要计算A类不确定度
             if self.__uA == 'single':
                 if Measure.AMethod == 'auto':
                     if len(self.__data) > 9:  #样本数量最大的组为9以上时，使用Bessel法
-                        uA = ACategory.Bessel(self.__data, process, True, self.__unit)
+                        uA = ACategory.Bessel(self.__data, process, True, oneMoreDigit)
                     else:
-                        uA = ACategory.Range(self.__data, process, True, self.__unit)
+                        uA = ACategory.Range(self.__data, process, True, oneMoreDigit)
                 elif Measure.AMethod == 'Bessel':
-                    uA = ACategory.Bessel(self.__data, process, True, self.__unit)
+                    uA = ACategory.Bessel(self.__data, process, True, oneMoreDigit)
                 elif Measure.AMethod == 'Range':
-                    uA = ACategory.Range(self.__data, process, True, self.__unit)
+                    uA = ACategory.Range(self.__data, process, True, oneMoreDigit)
                 elif Measure.AMethod == 'CollegePhysics':
-                    uA = ACategory.CollegePhysics(self.__data, process, True, self.__unit)
+                    uA = ACategory.CollegePhysics(self.__data, process, True, oneMoreDigit)
             elif self.__uA == 'comb':
-                uA = ACategory.CombSamples(self.__data, Measure.AMethod, process, True, self.__sym, self.__unit)
+                uA = ACategory.CombSamples(self.__data, Measure.AMethod, process, True, self.__sym, self.__unit, oneMoreDigit)
         if self.__instrument != None:  #判断是否需要计算B类不确定度
-            uB = BCategory.b(self.__instrument, self.__sym, process, True)
+            uB = BCategory.b(self.__instrument, self.__sym, process, True, oneMoreDigit)
         if process:
             latex = LaTeX()
             if self.__uA != None:
@@ -144,19 +155,27 @@ class Measure(unc.Uncertainty):
                 uB = uB[0]
         if self.__uA != None and self.__instrument != None:
             u = amath.sqrt(uA**2 + uB**2)
+            if not remainOneMoreDigit:
+                u.cutOneDigit()
             if process:
                 latex.add(r'u_{%s}=\sqrt{{u_{%s A}}^{2}+{u_{%s B}}^{2}}=\sqrt{%s^{2}+%s^{2}}=%s{\rm %s}' % (self.__sym, self.__sym, self.__sym, uA.latex(1), uB.latex(1), u.latex(), self.__unit))
         elif self.__uA != None:
             u = uA
+            if not remainOneMoreDigit:
+                u.cutOneDigit()
             if process:
                 latex.add(r'u_{%s}=u_{%s A}=%s{\rm %s}' % (self.__sym, self.__sym, u.latex(), self.__unit))
         elif self.__instrument != None:
             u = uB
+            if not remainOneMoreDigit:
+                u.cutOneDigit()
             if process:
                 latex.add(r'u_{%s}=u_{%s B}=%s{\rm %s}' % (self.__sym, self.__sym, u.latex(), self.__unit))
         if self._Uncertainty__K != None:
             P = unc.KTable[self._Uncertainty__K]
             u = u * self._Uncertainty__K
+            if not remainOneMoreDigit:
+                u.cutOneDigit()
             if process:
                 latex.add(r'u_{%s,%s}=%g u_{%s}=%s{\rm %s}' % (self.__sym, P[1], self._Uncertainty__K, self.__sym, u.latex(), self.__unit))
         if process:

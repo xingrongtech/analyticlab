@@ -99,13 +99,24 @@ def dispLSymItem(lSymItem, resSym, resUnit=None, headExpr='根据公式$%s$，�
     latex = LaTeX()
     if analyticlab.lsymitem.LSymItem.sepSymCalc:
         latex.add((r'\text{' + headExpr + '}') % (resSym + '=' + lSymItem.getSepSym().sym()))
-        for i in range(len(lSymItem)):
-            latex.add(r'{%s}_{%d}=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+        if type(lSymItem._LSymItem__lsyms) == list:
+            for i in range(len(lSymItem)):
+                latex.add(r'{%s}_{%d}=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+        else:
+            for ki in lSymItem._LSymItem__lsyms.keys():
+                latex.add(r'{%s}_{%s}=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
     else:
-        for i in range(len(lSymItem)):
-            latex.add(r'{%s}_{%d}=%s=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].sym(), lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+        if type(lSymItem._LSymItem__lsyms) == list:
+            for i in range(len(lSymItem)):
+                latex.add(r'{%s}_{%d}=%s=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].sym(), lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+        else:
+            for ki in lSymItem._LSymItem__lsyms.keys():
+                latex.add(r'{%s}_{%s}=%s=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].sym(), lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
     if showMean:
-        mitem = analyticlab.numitem.NumItem([si.num() for si in lSymItem], sym=resSym, unit=resUnit)
+        if type(lSymItem._LSymItem__lsyms) == list:
+            mitem = analyticlab.numitem.NumItem([si.num() for si in lSymItem._LSymItem__lsyms], sym=resSym, unit=resUnit)
+        else:
+            mitem = analyticlab.numitem.NumItem([si.num() for si in lSymItem._LSymItem__lsyms.values()], sym=resSym, unit=resUnit)
         if meanExpr != None:
             latex.add((r'\text{' + meanExpr + '}') % mitem.mean(process=True)._LaTeX__lines[0])
         else:

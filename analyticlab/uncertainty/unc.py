@@ -66,13 +66,13 @@ class Uncertainty():
                 sObj = measures[obj._Measure__sym][0]._Uncertainty__symbol
         elif type(obj) == Const:
             if obj._Const__symText not in self.__consts:
-                sObj = Symbol(obj._Const__symText)
+                sObj = Symbol(obj._Const__symText, real=True)
                 consts[obj._Const__symText] = (obj, sObj)
             else:
                 sObj = self.__consts[obj._Const__symText][1]
         elif type(obj) == LSym:
             if obj._LSym__symText not in self.__lsyms:
-                sObj = Symbol(obj._LSym__symText)
+                sObj = Symbol(obj._LSym__symText, real=True)
                 lsyms[obj._LSym__symText] = (obj, sObj)
             else:
                 sObj = self.__lsyms[obj._LSym__symText][1]
@@ -207,10 +207,10 @@ class Uncertainty():
             y = self.__symbol
             m = list(self.__measures.values())
             cs, ls = self.__consts, self.__lsyms
-            um0 = Symbol('u_{%s}' % m[0][0]._Measure__sym)
+            um0 = Symbol('u_{%s}' % m[0][0]._Measure__sym, real=True)
             ssum = diff(y, m[0][0]._Uncertainty__symbol)**2 * um0**2
             for mi in m[1:]:
-                umi = Symbol('u_{%s}' % mi[0]._Measure__sym)
+                umi = Symbol('u_{%s}' % mi[0]._Measure__sym, real=True)
                 ssum += diff(y, mi[0]._Uncertainty__symbol)**2 * umi**2
             u = sympy.sqrt(ssum)
             if Uncertainty.simplifyUnc:

@@ -33,6 +33,14 @@ class itemNotSameLengthException(BaseException):
     def __init__(self, msg):
         print(msg)
         
+class itemNotSameTypeException(BaseException):
+    def __init__(self, msg):
+        print(msg)
+        
+class itemNotSameKeysException(BaseException):
+    def __init__(self, msg):
+        print(msg)
+        
 class keyNotInTableException(BaseException):
     def __init__(self, msg):
         print(msg)
