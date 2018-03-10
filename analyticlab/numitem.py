@@ -363,19 +363,32 @@ class NumItem():
         unit（str）：要设定的单位。'''
         self.__unit = unit
         
+    def setMuSym(self, muSym):
+        '''设定真值的符号
+        【参数说明】
+        muSym（str）：要设定的真值符号。'''
+        self.__muSym = muSym
+        
     def sym(self):
-        '''获得当前数值的符号
+        '''获得数组的符号
         【返回值】
-        str：数值的符号。
+        str：数组的符号。
         '''
         return self.__sym
     
     def unit(self):
-        '''获得当前数值的单位
+        '''获得数组的单位
         【返回值】
-        str：数值的单位。
+        str：数组的单位。
         '''
         return self.__unit
+    
+    def muSym(self):
+        '''获得真值的符号
+        【返回值】
+        str：真值的符号。
+        '''
+        return self.__muSym
     
     def __abs__(self):
         return self.__newInstance([n.__abs__() for n in self.__arr], sym=self.__sym, unit=self.__unit, dv=self.__gd_valid)

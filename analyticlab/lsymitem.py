@@ -118,7 +118,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -149,7 +149,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -180,7 +180,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -211,7 +211,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -273,7 +273,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -304,7 +304,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -335,7 +335,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -366,7 +366,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
@@ -397,7 +397,7 @@ class LSymItem():
         if type(obj) == LSymItem:
             if len(self) != len(obj):
                 raise itemNotSameLengthException('进行符号组运算的两个符号组元素个数必须一致')
-            if type(self.__lsyms) != self(obj.__lsyms):
+            if type(self.__lsyms) != type(obj.__lsyms):
                 raise itemNotSameTypeException('进行符号组运算的两个符号组必须是同种类型')
             if type(self.__lsyms) == list:
                 new.__lsyms = []
