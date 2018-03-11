@@ -447,6 +447,8 @@ class Num():
         elif type(obj) == Const:
             n.__num = self.__num * obj.value()
             n.__d_valid = self.__d_valid
+            if obj._Const__isHPercent:  #当被乘常数为100%时，将当前数值设定为相对比值
+                n.__isRelative = True
         elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
             obj.__resetDigit()
             n.__num = self.__num * obj.__num

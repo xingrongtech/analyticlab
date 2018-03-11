@@ -52,7 +52,7 @@ class LaTeX():
     def show(self):
         '''展示公式集'''
         slines = ['&'+li for li in self.__lines]
-        lExpr = r'\begin{align}' + (r'\\'.join(slines)) + r'\end{align}'
+        lExpr = r'\begin{align}' + ('\\\\ \n'.join(slines)) + r'\end{align}'
         display(Math(lExpr))
 
 def dispTable(table):
@@ -78,6 +78,8 @@ def dispLSym(lSym, resSym, resUnit=None):
     3.resUnit（可选，str）：计算结果的单位。当只展示符号表达式时，没必要给出计算结果的单位；若计算表达式和计算结果需要展示，则可选择是否给出resUnit。默认resUnit=None。
     【返回值】
     LaTeX：表格的公式集。'''
+    if resUnit == None:
+        resUnit = ''
     if lSym._LSym__genSym and lSym._LSym__genCal:
         return LaTeX(r'%s=%s=%s=%s{\rm %s}' % (resSym, lSym.sym(), lSym.cal(), lSym.num().latex(), resUnit))
     elif lSym._LSym__genSym:
@@ -97,6 +99,8 @@ def dispLSymItem(lSymItem, resSym, resUnit=None, headExpr='根据公式$%s$，�
     【返回值】
     LaTeX：表格的公式集。'''
     latex = LaTeX()
+    if resUnit == None:
+        resUnit = ''
     if analyticlab.lsymitem.LSymItem.sepSymCalc:
         latex.add((r'\text{' + headExpr + '}') % (resSym + '=' + lSymItem.getSepSym().sym()))
         if type(lSymItem._LSymItem__lsyms) == list:

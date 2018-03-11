@@ -15,6 +15,7 @@ class Const():
     __brac = -1  #当前符号式括号级别：-1为无括号，0为()，0为[]，0为{}
     __isUt1e = False
     __isT1e = False
+    __isHPercent = False
     '''
     符号优先级规定：
     + -：1
@@ -272,6 +273,9 @@ class Const():
     
 PI = Const(r'\pi ', math.pi)
 E = Const('e', math.e)
+
+hPercent = Const(r'100\%', 1)
+hPercent._Const__isHPercent = True
 
 def t1e(n):
     '''生成一般的科学记数法常量

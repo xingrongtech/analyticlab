@@ -261,7 +261,7 @@ class LSym():
                 symBrac = max(self.__symBrac, c_brac)
             if self.__genCal:
                 calText = s_calText + '+' + c_symText
-                sNum = self.__sNum + obj.value()
+                sNum = self.__sNum + obj
                 calBrac = max(s_calBrac, c_brac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -317,7 +317,7 @@ class LSym():
                 symBrac = max(c_brac, self.__symBrac)
             if self.__genCal:
                 calText = c_symText + '+' + s_calText
-                sNum = obj.value() + self.__sNum
+                sNum = obj + self.__sNum
                 calBrac = max(s_calBrac, c_brac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -383,7 +383,7 @@ class LSym():
                 symBrac = max(self.__symBrac, c_brac)
             if self.__genCal:
                 calText = s_calText + '-' + c_symText
-                sNum = self.__sNum - obj.value()
+                sNum = self.__sNum - obj
                 calBrac = max(s_calBrac, c_brac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -446,7 +446,7 @@ class LSym():
                 symBrac = max(c_brac, s_symBrac)
             if self.__genCal:
                 calText = c_symText + '-' + s_calText
-                sNum = obj.value() - self.__sNum
+                sNum = obj - self.__sNum
                 calBrac = max(c_brac, s_calBrac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -521,13 +521,15 @@ class LSym():
                 if obj._Const__isUt1e:
                     symText = s_symText  #当相乘的是用于单位换算的科学记数法时，忽略其符号
                 elif obj._Const__isT1e:
-                    symText = s_symText + '\cdot' + c_symText  #当相乘的是用于一般科学记数法时，需要加点乘号
+                    symText = s_symText + r' \cdot ' + c_symText  #当相乘的是用于一般科学记数法时，需要加点乘号
+                elif obj._Const__isHPercent:
+                    symText = s_symText + r' \times ' + c_symText  #当相乘的是100%时，需要加叉乘号
                 else:
                     symText = s_symText + c_symText
                 symBrac = max(s_symBrac, c_brac)
             if self.__genCal:
                 calText = s_calText + r' \times ' + c_symText
-                sNum = self.__sNum * obj.value()
+                sNum = self.__sNum * obj
                 calBrac = max(s_calBrac, c_brac)
         elif type(obj) == int or type(obj) == float:
             if self.__genSym:
@@ -601,12 +603,16 @@ class LSym():
             if self.__genSym:
                 if obj._Const__isUt1e:
                     symText = s_symText  #当相乘的是用于单位换算的科学记数法时，忽略其符号
+                elif obj._Const__isT1e:
+                    symText = c_symText + r' \cdot ' + s_symText  #当相乘的是用于一般科学记数法时，需要加点乘号
+                elif obj._Const__isHPercent:
+                    symText = c_symText + r' \times ' + s_symText  #当相乘的是100%时，需要加叉乘号
                 else:
                     symText = c_symText + s_symText
                 symBrac = max(c_brac, s_symBrac)
             if self.__genCal:
                 calText = c_symText + r' \times ' + s_calText
-                sNum = obj.value() * self.__sNum
+                sNum = obj * self.__sNum
                 calBrac = max(c_brac, s_calBrac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -646,11 +652,11 @@ class LSym():
                 calBrac = self.__calBrac
         elif type(obj) == Const:
             if self.__genSym:
-                symText = r'\cfrac{%s}{%s}' % (c_symText, obj)
+                symText = r'\cfrac{%s}{%s}' % (self.__symText, c_symText)
                 symBrac = max(self.__symBrac, c_brac)
             if self.__genCal:
                 calText = r'\cfrac{%s}{%s}' % (self.__calText, c_symText)
-                sNum = self.__sNum / obj.value()
+                sNum = self.__sNum / obj
                 calBrac = max(self.__calBrac, c_brac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -694,7 +700,7 @@ class LSym():
                 symBrac = max(c_brac, self.__symBrac)
             if self.__genCal:
                 calText = r'\cfrac{%s}{%s}' % (c_symText, self.__calText)
-                sNum = obj.value() / self.__sNum
+                sNum = obj / self.__sNum
                 calBrac = max(c_brac, self.__calBrac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -767,7 +773,7 @@ class LSym():
                 symBrac = max(s_symBrac, c_brac)
             if self.__genCal:
                 calText = s_calText + r'/' + c_symText
-                sNum = self.__sNum / obj.value()
+                sNum = self.__sNum / obj
                 calBrac = max(s_calBrac, c_brac)
         elif type(obj) == int or type(obj) == float:
             if self.__genSym:
@@ -840,7 +846,7 @@ class LSym():
                 symBrac = max(c_brac, s_symBrac)
             if self.__genCal:
                 calText = c_symText + r'/' + s_calText
-                sNum = obj.value() / self.__sNum
+                sNum = obj / self.__sNum
                 calBrac = max(c_brac, s_calBrac)
         elif 'sympy' in str(type(obj)):
             if self.__genSym:
@@ -902,7 +908,7 @@ class LSym():
                 symBrac = s_symBrac
         if self.__genCal:
             if type(b) == Const:
-                sNum = self.__sNum ** b.value()
+                sNum = self.__sNum ** b
                 calBrac = max(s_calBrac, c_brac)
             elif 'sympy' in str(type(b)):
                 sNum = self.__sNum ** float(b)
@@ -956,7 +962,7 @@ class LSym():
                 symBrac = self.__symBrac
         if self.__genCal:
             if type(a) == Const:
-                sNum = a.value() ** self.__sNum
+                sNum = a ** self.__sNum
                 calText = '%s^{%s}' % (c_symText, self.__calText)
                 calBrac = max(c_brac, self.__calBrac)
             elif type(a) == float:
