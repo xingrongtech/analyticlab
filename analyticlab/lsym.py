@@ -61,7 +61,30 @@ class LSym():
         elif sNum != None:
             raise expressionInvalidException('用于创建符号的参数无效')
         if type(self.__sNum) == int or type(self.__sNum) == float:
-            self.__calText = ('%g' % self.__sNum)
+            self.__calText = '%g' % self.__sNum
+        elif type(self.__sNum) == Num:
+            if self.__sNum._Num__sciDigit() != 0:
+                self.__calPrior = 2
+            self.__calText = '{' + self.__sNum.latex() + '}'
+        if self.__sNum != None:  #如果是原始符号，则需要考虑是否因为负数或科学记数法而需要改变prior的情形
+            if self.__sNum < 0:  #负数prior为0
+                self.__calPrior = 0
+            elif type(self.__sNum) == Num and self.__sNum._Num__sciDigit() != 0:  #科学记数法prior为2
+                self.__calPrior = 2
+            else:
+                self.__calPrior = 6
+        else:
+            self.__calPrior = 6
+            
+    def refreshSym(self, sym):
+        '''更新符号
+        调用此方法后，原本的符号表达式将会被更新成新的符号表达式，原本的计算表达式将会被更新为当前LaTeX符号的数值，即LaTeX符号被以新的符号和数值初始化。
+        【参数说明】
+        sym（str）：要更新成的符号。
+        '''
+        self.__symText = '{' + sym + '}'
+        if type(self.__sNum) == int or type(self.__sNum) == float:
+            self.__calText = '%g' % self.__sNum
         elif type(self.__sNum) == Num:
             if self.__sNum._Num__sciDigit() != 0:
                 self.__calPrior = 2

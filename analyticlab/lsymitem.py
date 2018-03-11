@@ -37,10 +37,10 @@ class LSymItem():
                 raise expressionInvalidException('用于创建符号组的数组部分的参数无效')
         else:
             raise expressionInvalidException('用于创建符号组的参数无效')
-        if LSymItem.sepSymCalc:  #将符号表达式与计算表达式分离
-            if subs == None:  #未给出下标时，__lsyms为list
+        if LSymItem.sepSymCalc:  #将代数表达式与数值表达式分离
+            if subs == None:  #未给出下标时，lsyms为list
                 self.__lsyms = [LSym(None, ni) for ni in sNumItem]
-            else:  #给出下标时，__lsyms为dict
+            else:  #给出下标时，lsyms为dict
                 subs = subs.split(' ')
                 if len(sNumItem) != len(subs):
                     raise itemNotSameLengthException('给出subs时，sNumItem和subs必须为等长列表')
@@ -49,17 +49,61 @@ class LSymItem():
                     self.__lsyms[subs[i]] = LSym(None, sNumItem[i])
             self.__sepSym = LSym(sym, None)
         else:
-            if subs == None:  #未给出下标时，__lsyms为list
+            if subs == None:  #未给出下标时，lsyms为list
                 self.__lsyms = [LSym('{' + sym + '}', ni) for ni in sNumItem]
                 for i in range(len(sNumItem)):
                     self.__lsyms[i]._LSym__symText += '_{' + str(i+1) + '}'
-            else:  #给出下标时，__lsyms为dict
+            else:  #给出下标时，lsyms为dict
                 subs = subs.split(' ')
                 if len(sNumItem) != len(subs):
                     raise itemNotSameLengthException('给出subs时，sNumItem和subs必须为等长列表')
                 self.__lsyms = {}
                 for i in range(len(sNumItem)):
                     self.__lsyms[subs[i]] = LSym('{%s}_{%s}' % (sym, subs[i]), sNumItem[i])
+    
+    
+    def refreshSym(self, sym):
+        '''更新符号
+        调用此方法后，原本的符号表达式将会被更新成新的符号表达式，原本的计算表达式将会被更新为当前LaTeX符号组中每个符号的数值，即LaTeX符号组被以新的符号和数值初始化。
+        【参数说明】
+        sym（str）：要更新成的符号。
+        '''
+        ##############################################
+        def lsymSetCal(li):
+            '''设置一个LSym的与计算计算有关的参量'''
+            if type(li._LSym__sNum) == int or type(li._LSym__sNum) == float:
+                li._LSym__calText = '%g' % li._LSym__sNum
+            elif str(type(li._LSym__sNum)) == "<class 'analyticlab.num.Num'>":
+                if li._LSym__sNum._Num__sciDigit() != 0:
+                    li._LSym__calPrior = 2
+                li._LSym__calText = '{' + li._LSym__sNum.latex() + '}'
+            if li._LSym__sNum != None:  #如果是原始符号，则需要考虑是否因为负数或科学记数法而需要改变prior的情形
+                if li._LSym__sNum < 0:  #负数prior为0
+                    li._LSym__calPrior = 0
+                elif str(type(li._LSym__sNum)) == "<class 'analyticlab.num.Num'>" and li._LSym__sNum._Num__sciDigit() != 0:  #科学记数法prior为2
+                    li._LSym__calPrior = 2
+                else:
+                    li._LSym__calPrior = 6
+            else:
+                li._LSym__calPrior = 6
+        ##############################################
+        if LSymItem.sepSymCalc:  #代数表达式与数值表达式分离时，更新sepSym的symText和lsyms的calText
+            self.__sepSym._LSym__symText = '{' + sym + '}'
+            if type(self.__lsyms) == list:
+                for li in self.__lsyms:
+                    lsymSetCal(li)
+            else:
+                for ki in self.__lsyms.keys():
+                    lsymSetCal(self.__lsyms[ki])
+        else:  #代数表达式与数值表达式不分离时，更新lsyms的symText和calText
+            if type(self.__lsyms) == list:
+                for i in range(len(self.__lsyms)):
+                    self.__lsyms[i]._LSym__symText = '{%s}_{%d}' % (sym, i+1)
+                    lsymSetCal(self.__lsyms[i])
+            else:
+                for ki in self.__lsyms.keys():
+                    self.__lsyms[ki]._LSym__symText = '{%s}_{%s}' % (sym, ki)
+                    lsymSetCal(self.__lsyms[ki])
     
     def __newInstance(self):
         return LSymItem(None, None)
