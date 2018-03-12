@@ -341,7 +341,7 @@ class LSym():
             o_symText = obj.__symText
             o_calBrac = obj.__calBrac
             o_calText = obj.__calText
-        else:
+        elif type(obj) == Const:
             c_brac = obj._Const__brac
             c_symText = obj._Const__symText
         symText = sNum = calText = symBrac = calBrac = None

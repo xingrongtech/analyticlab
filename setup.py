@@ -8,7 +8,7 @@ Created on Wed Jan 24 19:15:17 2018
 from distutils.core import setup
 
 setup(name = 'analyticlab',
-      version = '0.1.14',
+      version = '0.1.15',
       description='A library for experimental data calculation, treatment and display, which can be used for College Physics Experiment, Analytical Chemistry, etc.', 
       author = 'xingrongtech',
       author_email = 'wzv100@163.com',

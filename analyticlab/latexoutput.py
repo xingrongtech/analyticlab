@@ -70,28 +70,32 @@ def dispTable(table):
     tex += r'\hline\end{array}'
     return LaTeX(tex)
     
-def dispLSym(lSym, resSym, resUnit=None):
+def dispLSym(lSym, resSym=None, resUnit=None):
     '''展示一个LSym计算过程（根据原始LSym是否有符号和对应数值，决定是否显示符号表达式、计算表达式和计算结果）
     【参数说明】
     1.lSym（LSym）：要展示的LaTeX符号。通过lSym，可以获得符号表达式、计算表达式和计算结果数值。
-    2.resSym（str）：计算结果的符号。
+    2.resSym（可选，str）：计算结果的符号。当不给出符号时，生成的计算过程将只有代数表达式和数值表达式，而没有计算结果的符号。默认resSym=None。
     3.resUnit（可选，str）：计算结果的单位。当只展示符号表达式时，没必要给出计算结果的单位；若计算表达式和计算结果需要展示，则可选择是否给出resUnit。默认resUnit=None。
     【返回值】
     LaTeX：表格的公式集。'''
     if resUnit == None:
         resUnit = ''
+    if resSym == None:
+        resSymExpr = ''
+    else:
+        resSymExpr = resSym + '='
     if lSym._LSym__genSym and lSym._LSym__genCal:
-        return LaTeX(r'%s=%s=%s=%s{\rm %s}' % (resSym, lSym.sym(), lSym.cal(), lSym.num().latex(), resUnit))
+        return LaTeX(r'%s%s=%s=%s{\rm %s}' % (resSymExpr, lSym.sym(), lSym.cal(), lSym.num().latex(), resUnit))
     elif lSym._LSym__genSym:
-        return LaTeX(r'%s=%s' % (resSym, lSym.sym()))
+        return LaTeX(r'%s%s' % (resSymExpr, lSym.sym()))
     elif lSym._LSym__genCal:
-        return LaTeX(r'%s=%s=%s{\rm %s}' % (resSym, lSym.cal(), lSym.num().latex(), resUnit))
+        return LaTeX(r'%s%s=%s{\rm %s}' % (resSymExpr, lSym.cal(), lSym.num().latex(), resUnit))
         
-def dispLSymItem(lSymItem, resSym, resUnit=None, headExpr='根据公式$%s$，得', showMean=True, meanExpr=None):
+def dispLSymItem(lSymItem, resSym=None, resUnit=None, headExpr='根据公式$%s$，得', showMean=True, meanExpr=None):
     '''展示一个LSymItem计算过程（包括符号表达式和计算表达式）
     【参数说明】
     1.lSymItem（LSymItem）：要展示的LaTeX符号组。通过lSymItem，可以获得符号表达式、计算表达式和计算结果数值。
-    2.resSym（str）：计算结果的符号。
+    2.resSym（可选，str）：计算结果的符号。当不给出符号时，生成的计算过程将只有代数表达式和数值表达式，而没有计算结果的符号。默认resSym=None。
     3.resUnit（可选，str）：计算结果的单位。默认resUnit=None。
     4.headExpr（可选，str）：当符号表达式与计算表达式相分离时，对符号表达式进行语言修饰；当符号表达式与计算表达式在同一个等式中展示出来时，该参数无意义。默认headExpr='根据公式$%s$，得'。
     5.showMean（可选，bool）：是否展示符号组中各运算结果的均值及其运算过程。默认showMean=True。
@@ -104,19 +108,35 @@ def dispLSymItem(lSymItem, resSym, resUnit=None, headExpr='根据公式$%s$，�
     if analyticlab.lsymitem.LSymItem.sepSymCalc:
         latex.add((r'\text{' + headExpr + '}') % (resSym + '=' + lSymItem.getSepSym().sym()))
         if type(lSymItem._LSymItem__lsyms) == list:
-            for i in range(len(lSymItem)):
-                latex.add(r'{%s}_{%d}=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+            if resSym == None:
+                for i in range(len(lSymItem)):
+                    latex.add(r'%s=%s{\rm %s}' % (lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+            else:
+                for i in range(len(lSymItem)):
+                    latex.add(r'{%s}_{%d}=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
         else:
-            for ki in lSymItem._LSymItem__lsyms.keys():
-                latex.add(r'{%s}_{%s}=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
+            if resSym == None:
+                for ki in lSymItem._LSymItem__lsyms.keys():
+                    latex.add(r'%s=%s{\rm %s}' % (lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))                
+            else:
+                for ki in lSymItem._LSymItem__lsyms.keys():
+                    latex.add(r'{%s}_{%s}=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
     else:
         if type(lSymItem._LSymItem__lsyms) == list:
-            for i in range(len(lSymItem)):
-                latex.add(r'{%s}_{%d}=%s=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].sym(), lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+            if resSym == None:
+                for i in range(len(lSymItem)):
+                    latex.add(r'%s=%s=%s{\rm %s}' % (lSymItem[i].sym(), lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
+            else:
+                for i in range(len(lSymItem)):
+                    latex.add(r'{%s}_{%d}=%s=%s=%s{\rm %s}' % (resSym, i+1, lSymItem[i].sym(), lSymItem[i].cal(), lSymItem[i].num().latex(), resUnit))
         else:
-            for ki in lSymItem._LSymItem__lsyms.keys():
-                latex.add(r'{%s}_{%s}=%s=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].sym(), lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
-    if showMean:
+            if resSym == None:
+                for ki in lSymItem._LSymItem__lsyms.keys():
+                    latex.add(r'%s=%s=%s{\rm %s}' % (lSymItem[ki].sym(), lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))                
+            else:
+                for ki in lSymItem._LSymItem__lsyms.keys():
+                    latex.add(r'{%s}_{%s}=%s=%s=%s{\rm %s}' % (resSym, ki, lSymItem[ki].sym(), lSymItem[ki].cal(), lSymItem[ki].num().latex(), resUnit))
+    if showMean and resSym != None:
         if type(lSymItem._LSymItem__lsyms) == list:
             mitem = analyticlab.numitem.NumItem([si.num() for si in lSymItem._LSymItem__lsyms], sym=resSym, unit=resUnit)
         else:
