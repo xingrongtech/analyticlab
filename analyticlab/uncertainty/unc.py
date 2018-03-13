@@ -236,19 +236,20 @@ class Uncertainty():
         '''返回供展示不确定度使用的结果'''
         if not Uncertainty.process:
             return
-        uncLSym = self.__getUnc()
         res = {}
-        unc = uncLSym._LSym__sNum
-        unc.setIsRelative(self.__isPureMulDiv)
-        res['unc'] = uncLSym._LSym__sNum
-        res['isRate'] = self.__isPureMulDiv
         res['K'] = self.__K
         if self.__K != None:
             res['P'] = KTable[self.__K]
-        if Uncertainty.process:
-            res['uncLSym'] = uncLSym
-            if not self.__isPureMulDiv:
-                res['measures'] = self.__measures
+        if str(type(self)) =="<class 'analyticlab.uncertainty.unc.Uncertainty'>":
+            uncLSym = self.__getUnc()
+            unc = uncLSym._LSym__sNum
+            unc.setIsRelative(self.__isPureMulDiv)
+            res['unc'] = uncLSym._LSym__sNum
+            res['isRate'] = self.__isPureMulDiv
+            if Uncertainty.process:
+                res['uncLSym'] = uncLSym
+                if not self.__isPureMulDiv:
+                    res['measures'] = self.__measures
         return res
     
     def result(self):

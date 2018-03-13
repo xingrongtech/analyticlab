@@ -66,7 +66,13 @@ def dispTable(table):
     '''
     tex = r'\begin{array}{' + ('|'.join(['c']*len(table[0]))) + '}'
     for row in table:
-        tex += r'\hline' + (' & '.join([cell for cell in row])) + r'\\'
+        for j in range(len(row)):
+            if type(row[j]) != str:
+                if str(type(row[j])) == "<class 'analyticlab.num.Num'>":
+                    row[j] = str(row[j])
+                elif str(type(row[j])) == "<class 'analyticlab.numitem.NumItem'>":
+                    row[j] = ' & '.join([str(ci) for ci in row[j]])
+        tex += r'\hline ' + (' & '.join([cell for cell in row])) + r'\\'
     tex += r'\hline\end{array}'
     return LaTeX(tex)
     
@@ -158,29 +164,35 @@ def dispUnc(resUnc, resValue, resSym, resUnit, resDescription=None):
     【返回值】
     LaTeX：表格的公式集。'''
     latex = LaTeX()
-    measures = [mi[0] for mi in resUnc._Uncertainty__measures.values()]
-    for i in range(len(measures)):
-        latex.add(r'(%d)\text{对于%s：}' % (i+1, measures[i]._Measure__description))
-        latex.add(measures[i].unc(process=True))
     res = resUnc._Uncertainty__res()
     if str(type(resValue)) == "<class 'analyticlab.lsym.LSym'>":
         resValue = resValue.num()
-    latex.add(r'\text{计算合成不确定度：}')
-    if res['isRate']:
-        uncValue = res['unc']._Num__getRelative(dec=True) * resValue
-        latex.add(r'\frac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
-        latex.add(r'u_{%s}=\frac{u_{%s}}{%s}\cdot %s=%s\times %s=%s{\rm %s}' % (resSym, resSym, resSym, resSym, res['unc'].latex(), resValue.latex(), uncValue.latex(), resUnit))
-    else:
-        #给出不确定度计算定义式
-        pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._Measure__sym, mi[0]._Measure__sym) for mi in res['measures'].values()])
-        pExpr = r'\sqrt{%s}' % pExpr
-        latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s{\rm %s}' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex(), resUnit))
-    des = ''
-    eqNum = resValue
-    if res['isRate']:
-        uNum = uncValue
-    else:
-        uNum = res['unc']
+    if str(type(resUnc)) =="<class 'analyticlab.uncertainty.unc.Uncertainty'>":
+        #针对Uncertainty的不确定度输出
+        measures = [mi[0] for mi in resUnc._Uncertainty__measures.values()]
+        for i in range(len(measures)):
+            latex.add(r'(%d)\text{对于%s：}' % (i+1, measures[i]._Measure__description))
+            latex.add(measures[i].unc(process=True))
+        latex.add(r'\text{计算合成不确定度：}')
+        if res['isRate']:
+            uncValue = res['unc']._Num__getRelative(dec=True) * resValue
+            latex.add(r'\frac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
+            latex.add(r'u_{%s}=\frac{u_{%s}}{%s}\cdot %s=%s\times %s=%s{\rm %s}' % (resSym, resSym, resSym, resSym, res['unc'].latex(), resValue.latex(), uncValue.latex(), resUnit))
+        else:
+            #给出不确定度计算定义式
+            pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._Measure__sym, mi[0]._Measure__sym) for mi in res['measures'].values()])
+            pExpr = r'\sqrt{%s}' % pExpr
+            latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s{\rm %s}' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex(), resUnit))
+        des = ''
+        eqNum = resValue
+        if res['isRate']:
+            uNum = uncValue
+        else:
+            uNum = res['unc']
+    elif str(type(resUnc)) =="<class 'analyticlab.uncertainty.measure.Measure'>":
+        #针对Measure的不确定度输出
+        uNum, proc = resUnc.unc(process=True, needValue=True)
+        latex.add(proc)
     if res['K'] != None:
         uNum = res['K'] * uNum
         latex.add(r'u_{%s,%s}=%g u_{%s}=%s{\rm %s}' % (resSym, res['P'][1], res['K'], resSym, uNum.latex(), resUnit))

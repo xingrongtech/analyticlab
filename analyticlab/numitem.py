@@ -5,6 +5,7 @@ Created on Mon Jan 22 07:16:27 2018
 @author: xingrongtech
 """
 
+import numpy
 from math import sqrt, log10, fabs, floor
 from analyticlab.num import Num
 from analyticlab.const import Const
@@ -423,6 +424,12 @@ class NumItem():
         【返回值】
         list<float>：数值的int形式组成的列表。'''
         return [int(n._Num__num) for n in self.__arr]
+    
+    def toNumpyArray(self):
+        '''将当前数组转换成numpy数组
+        【返回值】
+        list<float>：新生成的numpy数组。'''
+        return numpy.array([float(n._Num__num) for n in self.__arr])
         
     def fix(self):
         '''数字修约
@@ -513,7 +520,7 @@ class NumItem():
         x._Num__d_front = max([ti._Num__d_front for ti in self.__arr])  #取小数点前位数较大者作为小数点前位数
         x._Num__d_behind = min([ti._Num__d_behind for ti in self.__arr if ti._Num__num != 0])  #取小数点后位数较小者作为小数点后位数
         x._Num__d_valid = self.__gd_valid
-        result = x.fix()
+        result = x
         if dec:
             return result._Num__num
         else:
