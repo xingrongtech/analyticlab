@@ -245,6 +245,13 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__add__(obj.__arr[i]))
             return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__add__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __radd__(self, obj):
         if type(obj) == int or type(obj) == float or type(obj) == Const:
@@ -257,6 +264,13 @@ class NumItem():
             newArr = []
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__radd__(obj.__arr[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__radd__(obj[i]))
             return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __sub__(self, obj):
@@ -271,6 +285,13 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__sub__(obj.__arr[i]))
             return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__sub__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __rsub__(self, obj):
         if type(obj) == int or type(obj) == float or type(obj) == Const:
@@ -283,6 +304,13 @@ class NumItem():
             newArr = []
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__rsub__(obj.__arr[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__rsub__(obj[i]))
             return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __mul__(self, obj):
@@ -297,6 +325,13 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__mul__(obj.__arr[i]))
             return self.__newInstance(newArr)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__mul__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __rmul__(self, obj):
         if type(obj) == int or type(obj) == float or type(obj) == Const:
@@ -310,6 +345,13 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__rmul__(obj.__arr[i]))
             return self.__newInstance(newArr)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__rmul__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __truediv__(self, obj):
         if type(obj) == int or type(obj) == float or type(obj) == Const:
@@ -323,6 +365,13 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__truediv__(obj.__arr[i]))
             return self.__newInstance(newArr)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__truediv__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __rtruediv__(self, obj):
         if type(obj) == int or type(obj) == float or type(obj) == Const:
@@ -336,12 +385,35 @@ class NumItem():
             for i in range(len(self.__arr)):
                 newArr.append(self.__arr[i].__rtruediv__(obj.__arr[i]))
             return self.__newInstance(newArr)
+        elif type(obj) == list and (type(obj[0]) == int or type(obj[0]) == float):
+            if len(self.__arr) != len(obj):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__rtruediv__(obj[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __pow__(self, b):
-        return self.__newInstance([n.__pow__(b) for n in self.__arr], dv=self.__gd_valid)
+        if type(b) == int or type(b) == float or type(b) == Const:
+            return self.__newInstance([n.__pow__(b) for n in self.__arr], dv=self.__gd_valid)
+        elif type(b) == list and (type(b[0]) == int or type(b[0]) == float):
+            if len(self.__arr) != len(b):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__pow__(b[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def __rpow__(self, a):
-        return self.__newInstance([n.__rpow__(a) for n in self.__arr])
+        if type(a) == int or type(a) == float or type(a) == Const:
+            return self.__newInstance([n.__rpow__(a) for n in self.__arr])
+        elif type(a) == list and (type(a[0]) == int or type(a[0]) == float):
+            if len(self.__arr) != len(a):
+                raise itemNotSameLengthException('进行数组运算的纯数字列表与数组的元素个数必须一致！')
+            newArr = []
+            for i in range(len(self.__arr)):
+                newArr.append(self.__arr[i].__pow__(a[i]))
+            return self.__newInstance(newArr, sym=self.__sym, unit=self.__unit)
     
     def setMu(self, mu):
         '''设定真值μ，用于误差分析
@@ -413,14 +485,14 @@ class NumItem():
         [n.setIsRelative(isRelative) for n in self.__arr]
         self.__isRelative = isRelative
         
-    def toFloatArray(self):
-        '''将当前数组转换成float
+    def toFloatList(self):
+        '''将当前数组转换成float列表
         【返回值】
         list<float>：数值的float形式组成的列表。'''
         return [float(n._Num__num) for n in self.__arr]
     
-    def toIntArray(self):
-        '''将当前数组转换成int
+    def toIntList(self):
+        '''将当前数组转换成int列表
         【返回值】
         list<float>：数值的int形式组成的列表。'''
         return [int(n._Num__num) for n in self.__arr]

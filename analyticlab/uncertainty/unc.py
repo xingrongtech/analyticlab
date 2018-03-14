@@ -5,8 +5,8 @@ Created on Tue Feb  6 22:21:31 2018
 @author: xingrongtech
 """
 
-import re, sympy, time
-from sympy import Symbol, diff, Rational
+import re, sympy
+from sympy import Symbol, diff
 from analyticlab import amath
 from analyticlab.const import Const
 from analyticlab.lsym import LSym
@@ -41,9 +41,9 @@ class Uncertainty():
         lsyms = self.__lsyms
         if type(self) != Uncertainty and self._Measure__sym not in measures:  #对于测量，判断是否要将该测量添加到测量列表中
             if Uncertainty.process:
-                measures[self._Measure__sym] = (self, LSym(self._Measure__sym, self._Measure__value), LSym('u_{%s}' % self._Measure__sym, self.unc()))
+                measures[self._Measure__sym] = (self, LSym(self._Measure__sym, self._Measure__value), LSym('u_{%s}' % self._Measure__sym, self.unc(remainOneMoreDigit=True)))
             else:
-                measures[self._Measure__sym] = (self, self._Measure__value, self.unc())
+                measures[self._Measure__sym] = (self, self._Measure__value, self.unc(remainOneMoreDigit=True))
         if type(obj) == Uncertainty:
             for oKey in obj._Uncertainty__measures.keys():
                 if oKey not in measures:
@@ -58,9 +58,9 @@ class Uncertainty():
         elif str(type(obj)) == "<class 'analyticlab.uncertainty.measure.Measure'>":
             if obj._Measure__sym not in measures:
                 if Uncertainty.process:
-                    measures[obj._Measure__sym] = (obj, LSym(obj._Measure__sym, obj._Measure__value), LSym('u_{%s}' % obj._Measure__sym, obj.unc()))
+                    measures[obj._Measure__sym] = (obj, LSym(obj._Measure__sym, obj._Measure__value), LSym('u_{%s}' % obj._Measure__sym, obj.unc(remainOneMoreDigit=True)))
                 else:
-                    measures[obj._Measure__sym] = (obj, obj._Measure__value, obj.unc())
+                    measures[obj._Measure__sym] = (obj, obj._Measure__value, obj.unc(remainOneMoreDigit=True))
                 sObj = obj._Uncertainty__symbol
             else:
                 sObj = measures[obj._Measure__sym][0]._Uncertainty__symbol
@@ -240,7 +240,7 @@ class Uncertainty():
         res['K'] = self.__K
         if self.__K != None:
             res['P'] = KTable[self.__K]
-        if str(type(self)) =="<class 'analyticlab.uncertainty.unc.Uncertainty'>":
+        if type(self) == Uncertainty:
             uncLSym = self.__getUnc()
             unc = uncLSym._LSym__sNum
             unc.setIsRelative(self.__isPureMulDiv)

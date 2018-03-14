@@ -6,7 +6,7 @@ Created on Mon Feb  5 08:41:19 2018
 """
 
 import analyticlab
-from IPython.display import display, Math
+from IPython.display import display, Latex
 from analyticlab.system.exceptions import expressionInvalidException
 
 class LaTeX():
@@ -52,8 +52,8 @@ class LaTeX():
     def show(self):
         '''展示公式集'''
         slines = ['&'+li for li in self.__lines]
-        lExpr = r'\begin{align}' + ('\\\\ \n'.join(slines)) + r'\end{align}'
-        display(Math(lExpr))
+        lExpr = r'$\begin{align}' + ('\\\\ \n'.join(slines)) + r'\end{align}$'
+        display(Latex(lExpr))
 
 def dispTable(table):
     '''展示一个简单格式的表格。表格的格式为m行n列，列宽由公式长度而定，公式居中。
@@ -69,9 +69,13 @@ def dispTable(table):
         for j in range(len(row)):
             if type(row[j]) != str:
                 if str(type(row[j])) == "<class 'analyticlab.num.Num'>":
-                    row[j] = str(row[j])
+                    row[j] = row[j].latex()
                 elif str(type(row[j])) == "<class 'analyticlab.numitem.NumItem'>":
-                    row[j] = ' & '.join([str(ci) for ci in row[j]])
+                    row[j] = ' & '.join([ci.latex() for ci in row[j]])
+                elif type(row[j]) == float:
+                    row[j] = '%g' % row[j]
+                else:
+                    row[j] = str(row[j])
         tex += r'\hline ' + (' & '.join([cell for cell in row])) + r'\\'
     tex += r'\hline\end{array}'
     return LaTeX(tex)
@@ -153,13 +157,13 @@ def dispLSymItem(lSymItem, resSym=None, resUnit=None, headExpr='根据公式$%s$
             latex.add(mitem.mean(process=True))
     return latex
             
-def dispUnc(resUnc, resValue, resSym, resUnit, resDescription=None):
+def dispUnc(resUnc, resValue, resSym=None, resUnit=None, resDescription=None):
     '''输出不确定度
     【参数说明】
     1.resUnc（Uncertainty或Measure）：最终测量结果的不确定度。
     2.resValue（Num）：最终测量结果的数值。
-    3.resSym（str）：最终测量结果的符号。
-    4.resUnit（str）：最终测量结果的单位。
+    3.resSym（可选，str）：最终测量结果的符号。当resUnc为Measure时，不需要给出，否则必须给出。默认resSym=None。
+    4.resUnit（可选，str）：最终测量结果的单位。当resUnc为Measure时，不需要给出，否则必须给出。默认resUnit=None。
     5.resDescription（可选，str）：对最终测量结果的描述。默认resDescription=None。
     【返回值】
     LaTeX：表格的公式集。'''
@@ -172,7 +176,7 @@ def dispUnc(resUnc, resValue, resSym, resUnit, resDescription=None):
         measures = [mi[0] for mi in resUnc._Uncertainty__measures.values()]
         for i in range(len(measures)):
             latex.add(r'(%d)\text{对于%s：}' % (i+1, measures[i]._Measure__description))
-            latex.add(measures[i].unc(process=True))
+            latex.add(measures[i].unc(process=True, remainOneMoreDigit=True))
         latex.add(r'\text{计算合成不确定度：}')
         if res['isRate']:
             uncValue = res['unc']._Num__getRelative(dec=True) * resValue
@@ -183,19 +187,21 @@ def dispUnc(resUnc, resValue, resSym, resUnit, resDescription=None):
             pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._Measure__sym, mi[0]._Measure__sym) for mi in res['measures'].values()])
             pExpr = r'\sqrt{%s}' % pExpr
             latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s{\rm %s}' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex(), resUnit))
-        des = ''
-        eqNum = resValue
         if res['isRate']:
             uNum = uncValue
         else:
             uNum = res['unc']
     elif str(type(resUnc)) =="<class 'analyticlab.uncertainty.measure.Measure'>":
         #针对Measure的不确定度输出
-        uNum, proc = resUnc.unc(process=True, needValue=True)
+        uNum, proc = resUnc.unc(process=True, needValue=True, remainOneMoreDigit=True)
         latex.add(proc)
+        resSym = resUnc._Measure__sym
+        resUnit = resUnc._Measure__unit
+    eqNum = resValue
     if res['K'] != None:
         uNum = res['K'] * uNum
         latex.add(r'u_{%s,%s}=%g u_{%s}=%s{\rm %s}' % (resSym, res['P'][1], res['K'], resSym, uNum.latex(), resUnit))
+    des = ''
     if resDescription != None:
         des = resDescription
     sciDigit = eqNum._Num__sciDigit()

@@ -4,6 +4,7 @@ Created on Mon Feb  5 19:28:45 2018
 
 @author: xingrongtech
 """
+from analyticlab.num import Num
 from analyticlab.numitem import NumItem
 from analyticlab.lsym import LSym
 from analyticlab.system.exceptions import itemNotSameLengthException, itemNotSameTypeException, itemNotSameKeysException, expressionInvalidException
@@ -25,17 +26,18 @@ class LSymItem():
         (1)NumItem：直接给出符号组对应的NumItem数组。
         (2)str：对于还没有转换成Num的数值，将数值以空格隔开，表示成字符串表达式，以此生成符号组对应的NumItem数组。
         (3)list<Num>：对于已经转换成Num的数值，将数值用list表示出，以此生成符号组对应的NumItem数组。
+        (4)list<int>或list<float>：给出一组纯数字组成的list。
         3.subs（可选，str）：符号组中每个符号的下标，以空格隔开。在LSymItem.sepSymCalc为False的前提下，当subs为None时，会按照0、1、2...给每个符号索引，1、2、3...给每个符号编号；给出subs时，按照subs中给出的编号给每个符号索引和编号。默认subs=None。
         '''
         if sym == None and sNumItem == None:
             return
         self.__symText = sym
-        if type(sNumItem) == str or type(sNumItem) == list:
+        if type(sNumItem) == str or (type(sNumItem) == list and type(sNumItem[0]) == Num):
             try:
                 sNumItem = NumItem(sNumItem)
             except:
                 raise expressionInvalidException('用于创建符号组的数组部分的参数无效')
-        else:
+        elif not (type(sNumItem) == list and (type(sNumItem[0]) == int or type(sNumItem[0]) == float)):
             raise expressionInvalidException('用于创建符号组的参数无效')
         if LSymItem.sepSymCalc:  #将代数表达式与数值表达式分离
             if subs == None:  #未给出下标时，lsyms为list
