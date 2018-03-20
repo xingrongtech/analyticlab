@@ -6,8 +6,8 @@ Created on Tue Feb  6 11:50:19 2018
 """
 
 from math import fabs
-from analyticlab.num import Num
-from analyticlab.system.numberformat import getDigitFront, getDigitBehind
+from ..num import Num
+from .numberformat import getDigitFront, getDigitBehind
 
 def statFormat(gd_valid, number, isRelative=False):
     '''统计结果格式化'''
