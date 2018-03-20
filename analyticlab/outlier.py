@@ -6,14 +6,10 @@ Created on Fri Feb  2 14:13:19 2018
 """
 
 from math import sqrt
-from analyticlab.numitem import NumItem
-from analyticlab.lsymitem import LSymItem
-from analyticlab.latexoutput import LaTeX
-from analyticlab.lookup.GrubbsTable import G
-from analyticlab.lookup.DixonTable import D
-from analyticlab.lookup.SkewKuriTable import b
-from analyticlab.lookup.NairTable import R
-from analyticlab.lookup.alphaToConf import rep
+from .numitem import NumItem
+from .lsymitem import LSymItem
+from .latexoutput import LaTeX
+from .lookup import G, D, b, R, rep
 
 def Nair(item, sigma, detLevel=0.05, delLevel=0.01, side='double', process=False, needValue=False):
     '''Nair检验

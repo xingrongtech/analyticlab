@@ -4,11 +4,10 @@ Created on Tue Feb  6 18:22:57 2018
 
 @author: xingrongtech
 """
-from math import sqrt
-from analyticlab.num import Num
-from analyticlab.latexoutput import LaTeX
+from ..num import Num
+from ..latexoutput import LaTeX
 
-kValue = (1, sqrt(3), sqrt(6), sqrt(2), 1)
+kValue = (1, 3**0.5, 6**0.5, 2**0.5, 1)
 kExpr = ('1', r'\sqrt{3}', r'\sqrt{6}', r'\sqrt{2}', '1')
     
 def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=True):
@@ -28,7 +27,7 @@ def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=T
     if instrument.distribution <= 4:
         uB = a / kValue[instrument.distribution]
     else:
-        uB = a / sqrt(6/(1+instrument.beta**2))
+        uB = a / (6/(1+instrument.beta**2))**0.5
     if remainOneMoreDigit:
         uB.remainOneMoreDigit()
     if process:

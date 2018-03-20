@@ -7,10 +7,10 @@ Created on Tue Feb  6 22:21:31 2018
 
 import re, sympy
 from sympy import Symbol, diff
-from analyticlab import amath
-from analyticlab.const import Const
-from analyticlab.lsym import LSym
-from analyticlab.system.exceptions import keyNotInTableException
+from ..amath import sqrt
+from ..const import Const
+from ..lsym import LSym
+from ..system.exceptions import keyNotInTableException
 
 KTable = {0.67:(0.50,'50'), 1.645:(0.90,'90'), 1.960:(0.95,'95'), 2:(0.9545,'95'), 2.576:(0.99,'99'), 3:(0.9973,'99')}
 
@@ -201,7 +201,7 @@ class Uncertainty():
             uSum = times(meaTimes[0])
             for mea in meaTimes[1:]:
                 uSum += times(mea)
-            res = amath.sqrt(uSum)
+            res = sqrt(uSum)
         else:
             #对于纯乘除测量公式的不确定度计算，使用sympy求偏导实现
             y = self.__symbol
@@ -220,7 +220,6 @@ class Uncertainty():
                 return 'Rational%s' % matched.group('rat').replace('/', ',')
             uExpr = re.sub('(?P<rat>\((-?\d+)(\.\d+)?/(-?\d+)(\.\d+)?\))', repRat, uExpr)
             uExpr = uExpr.replace('log(10)', '2.303')
-            uExpr = uExpr.replace('sqrt', 'amath.sqrt')
             for mi in m:
                 si = mi[0]._Measure__sym
                 uExpr = uExpr.replace(si, 'ms[r"%s"][1]' % si)

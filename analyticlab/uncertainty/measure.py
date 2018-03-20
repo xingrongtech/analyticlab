@@ -6,14 +6,14 @@ Created on Tue Feb  6 20:04:16 2018
 """
 
 from sympy import Symbol
-from analyticlab import amath
-from analyticlab.num import Num
-from analyticlab.numitem import NumItem
-from analyticlab.lsym import LSym
-from analyticlab.lsymitem import LSymItem
-from analyticlab.uncertainty import ACategory, BCategory, unc
-from analyticlab.latexoutput import LaTeX
-from analyticlab.system.exceptions import expressionInvalidException
+from ..amath import sqrt
+from ..num import Num
+from ..numitem import NumItem
+from ..lsym import LSym
+from ..lsymitem import LSymItem
+from ..latexoutput import LaTeX
+from ..uncertainty import ACategory, BCategory, unc
+from ..system.exceptions import expressionInvalidException
 
 class Measure(unc.Uncertainty):
     '''Measure为测量类，该类通过给出一组直接测量的数据以及测量该数据所使用的仪器，从而计算单个测量的标准不确定度。'''
@@ -154,7 +154,7 @@ class Measure(unc.Uncertainty):
                 latex.add(uB[1])
                 uB = uB[0]
         if self.__uA != None and self.__instrument != None:
-            u = amath.sqrt(uA**2 + uB**2)
+            u = sqrt(uA**2 + uB**2)
             if not remainOneMoreDigit:
                 u.cutOneDigit()
             if process:

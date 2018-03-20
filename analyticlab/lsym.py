@@ -6,10 +6,10 @@ Created on Mon Feb  5 15:18:09 2018
 """
 
 import sympy
-from analyticlab.num import Num
-from analyticlab.const import Const
-from analyticlab.system.numberformat import dec2Latex
-from analyticlab.system.exceptions import expressionInvalidException
+from .num import Num
+from .const import Const
+from .system.numberformat import dec2Latex
+from .system.exceptions import expressionInvalidException
 
 class LSym():
     '''LSym为LaTeX符号生成类，该类能够通过计算公式，自动生成符号式、运算式的LaTeX表达式。'''

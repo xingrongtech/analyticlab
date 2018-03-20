@@ -6,10 +6,10 @@ Created on Mon Feb  5 08:41:19 2018
 """
 
 import analyticlab
+from .system.exceptions import expressionInvalidException
 from IPython.display import display, Latex
-from analyticlab.system.exceptions import expressionInvalidException
 
-class LaTeX():
+class LaTeX(object):
     '''LaTeX为公式集类，该类用于储存一系列数学公式的LaTeX代码并输出公式。'''
     def __init__(self, line=None):
         '''初始化一个LaTeX公式集
@@ -54,6 +54,23 @@ class LaTeX():
         slines = ['&'+li for li in self.__lines]
         lExpr = r'$\begin{align}' + ('\\\\ \n'.join(slines)) + r'\end{align}$'
         display(Latex(lExpr))
+    
+    def _repr_latex_(self):
+        slines = ['&'+li for li in self.__lines]
+        lExpr = r'$\begin{align}' + ('\\\\ \n'.join(slines)) + r'\end{align}$'
+        return lExpr
+    
+    def addTable(self, table):
+        self.add(dispTable(table))
+        
+    def addLSym(self, lsym, resSym=None, resUnit=None):
+        self.add(dispLSym(lsym, resSym, resUnit))
+        
+    def addLSymItem(self, lSymItem, resSym=None, resUnit=None, headExpr='根据公式$%s$，得', showMean=True, meanExpr=None):
+        self.add(dispLSymItem(lSymItem, resSym, resUnit, headExpr, showMean, meanExpr))
+        
+    def addUnc(self, resUnc, resValue, resSym=None, resUnit=None, resDescription=None):
+        self.add(dispUnc(resUnc, resValue, resSym, resUnit, resDescription))
 
 def dispTable(table):
     '''展示一个简单格式的表格。表格的格式为m行n列，列宽由公式长度而定，公式居中。

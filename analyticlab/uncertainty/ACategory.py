@@ -5,14 +5,13 @@ Created on Tue Feb  6 10:15:25 2018
 @author: xingrongtech
 """
 
-from analyticlab.uncertainty import std
-from math import sqrt
-from analyticlab import amath
-from analyticlab.latexoutput import LaTeX
-from analyticlab.numitem import NumItem
-from analyticlab.lookup.Physics_tTable import t
-from analyticlab.lookup.RangeTable import v as rv
-from analyticlab.lookup.RangeTable import C as rC
+from . import std
+from ..amath import sqrt
+from ..latexoutput import LaTeX
+from ..numitem import NumItem
+from ..lookup.Physics_tTable import phy_t
+from ..lookup.RangeTable import v as rv
+from ..lookup.RangeTable import C as rC
 
 def Bessel(item, process=False, needValue=False, remainOneMoreDigit=False):
     '''贝塞尔公式法计算A类不确定度
@@ -25,7 +24,7 @@ def Bessel(item, process=False, needValue=False, remainOneMoreDigit=False):
     ①process为False时，返回值为Num类型的A类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。
     ③process为True且needValue为True时，返回值为Num类型的A类不确定度和LaTeX类型的计算过程组成的元组。'''
-    result = std.Bessel(item, remainOneMoreDigit) / sqrt(len(item))
+    result = std.Bessel(item, remainOneMoreDigit) / len(item)**0.5
     if process:
         unitExpr = ''
         if item._NumItem__unit != None:
@@ -58,7 +57,7 @@ def Range(item, process=False, needValue=False, remainOneMoreDigit=False):
     ①process为False时，返回值为Num类型的A类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。
     ③process为True且needValue为True时，返回值为Num类型的A类不确定度和LaTeX类型的计算过程组成的元组。'''
-    result = std.Range(item, remainOneMoreDigit) / sqrt(len(item))
+    result = std.Range(item, remainOneMoreDigit) / len(item)**0.5
     if process:
         unitExpr = ''
         if item._NumItem__unit != None:
@@ -84,7 +83,7 @@ def CollegePhysics(item, process=False, needValue=False, remainOneMoreDigit=Fals
     ①process为False时，返回值为Num类型的A类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。
     ③process为True且needValue为True时，返回值为Num类型的A类不确定度和LaTeX类型的计算过程组成的元组。'''
-    result = t(len(item)) * std.CollegePhysics(item, remainOneMoreDigit) / sqrt(len(item))
+    result = phy_t(len(item)) * std.CollegePhysics(item, remainOneMoreDigit) / len(item)**0.5
     if process:
         unitExpr = ''
         if item._NumItem__unit != None:
@@ -94,12 +93,12 @@ def CollegePhysics(item, process=False, needValue=False, remainOneMoreDigit=Fals
         if sciDigit == 0:
             p_mean = item.mean()
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).latex(1)) for xi in item._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d\times %d}\left[%s\right]}=%s{\rm %s}' % (signal, signal, signal, t(len(item)), len(item), len(item)-1, sumExpr, result.latex(), unitExpr)) 
+            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d\times %d}\left[%s\right]}=%s{\rm %s}' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, result.latex(), unitExpr)) 
         else:
             d_arr = item * 10**(-sciDigit)
             p_mean = item.mean() * 10**(-sciDigit)
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).latex(1)) for xi in d_arr._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s{\rm %s}' % (signal, signal, signal, t(len(item)), len(item), len(item)-1, sumExpr, sciDigit, result.latex(), unitExpr))
+            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s{\rm %s}' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, sciDigit, result.latex(), unitExpr))
         if needValue:
             return result, latex
         else:
@@ -150,7 +149,7 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
             break
     if nSame:
         nTotal = m*n
-        sp = amath.sqrt(sum([si**2 for si in s]) / m)
+        sp = sqrt(sum([si**2 for si in s]) / m)
         if method == 'CollegePhysics':
             vSum = m*(n-1)
     else:
@@ -162,17 +161,17 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
                 v = rv(len(items[i]))
                 dSum += v * s[i]**2
                 vSum += v
-            sp = amath.sqrt(dSum / vSum)
+            sp = sqrt(dSum / vSum)
         else:
             for i in range(m):
                 v = len(items[i]) - 1
                 dSum += v * s[i]**2
                 vSum += v
-            sp = amath.sqrt(dSum / vSum)
+            sp = sqrt(dSum / vSum)
     if method == 'CollegePhysics':
-        result = t(vSum+1) * sp / sqrt(nTotal)
+        result = phy_t(vSum+1) * sp / nTotal**0.5
     else:
-        result = sp / sqrt(nTotal)
+        result = sp / nTotal**0.5
     if not remainOneMoreDigit:
         result.cutOneDigit()
     if process:
@@ -212,7 +211,7 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
             else:
                 latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m {s_{%s i}}^{2}}{m}}=\sqrt{\frac{%s}{%d}}\times 10^{%d}=%s{\rm %s}' % (sym, sumExpr, m, sciDigit, sp.latex(), unit))
             if method == 'CollegePhysics':
-                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{mn}}=\frac{%.2f \times %s}{\sqrt{%s}}=%s{\rm %s}' % (sym, t(vSum+1), sp.latex(2), nTotal, result.latex(), unit))
+                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{mn}}=\frac{%.2f \times %s}{\sqrt{%s}}=%s{\rm %s}' % (sym, phy_t(vSum+1), sp.latex(2), nTotal, result.latex(), unit))
             else:
                 latex.add(r'u_{%s A}=\frac{s_p}{\sqrt{mn}}=\frac{%s}{\sqrt{%s}}=%s{\rm %s}' % (sym, sp.latex(), nTotal, result.latex(), unit))
         else:
@@ -231,7 +230,7 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
             else:
                 latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m \left(v_{i}s_{%s i}^{2}\right)}{\sum\limits_{i=1}^m v_{i}}}=\sqrt{\frac{%s}{%s}}\times 10^{%d}=%s{\rm %s}' % (sym, sumExpr, vSumExpr, sciDigit, sp.latex(), unit))
             if method == 'CollegePhysics':
-                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\frac{%s \times %s}{\sqrt{%s}}=%s{\rm %s}' % (sym, t(vSum+1), sp.latex(2), nTotal, result.latex(), unit))
+                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\frac{%s \times %s}{\sqrt{%s}}=%s{\rm %s}' % (sym, phy_t(vSum+1), sp.latex(2), nTotal, result.latex(), unit))
             else:
                 latex.add(r'u_{%s A}=\frac{s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\frac{%s}{\sqrt{%s}}=%s{\rm %s}' % (sym, sp.latex(), nTotal, result.latex(), unit))
         if needValue:

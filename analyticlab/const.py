@@ -5,7 +5,7 @@ Created on Wed Feb  7 13:10:41 2018
 @author: wzv100
 """
 import math
-from analyticlab.system.numberformat import dec2Latex
+from .system.numberformat import dec2Latex
 
 class Const():
     '''Const为常数类，通过该类定义的常数，可以在数值运算、LaTeX符号运算、符号显示中使用。'''

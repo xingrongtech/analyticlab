@@ -7,12 +7,12 @@ Created on Mon Jan 22 07:16:27 2018
 
 import numpy
 from math import sqrt, log10, fabs, floor
-from analyticlab.num import Num
-from analyticlab.const import Const
-from analyticlab.latexoutput import LaTeX
-from analyticlab.lookup.tTable import t, repl
-from analyticlab.system.statformat import statFormat, getMaxDeltaDigit
-from analyticlab.system.exceptions import expressionInvalidException, muNotFoundException, itemNotSameLengthException
+from .num import Num
+from .const import Const
+from .latexoutput import LaTeX
+from .lookup import t, t_repl
+from .system.statformat import statFormat, getMaxDeltaDigit
+from .system.exceptions import expressionInvalidException, muNotFoundException, itemNotSameLengthException
 
 class NumItem():
     '''NumItem类为分析数组类，该类具有以下特性：
@@ -943,7 +943,7 @@ class NumItem():
             if side == 'double':
                 latex.add(r'\text{对于双侧区间，}P=1-\frac{\alpha}{2}=%g\text{，查表得n=%d时，}t_{%g}\left(%d\right)=%.3f' % (confLevel, n, confLevel, n-1, tv))
             elif side == 'left' or side == 'right':
-                latex.add((r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得n=%d时，}t_{%g}\left(%d\right)=%.3f") % (confLevel, repl(confLevel), n, repl(confLevel), n-1, tv))
+                latex.add((r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得n=%d时，}t_{%g}\left(%d\right)=%.3f") % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
         if side == 'double':
             if process:
                 latex.add(r'\text{置信区间为}\left(\overline{%s}-\frac{ts_{%s}}{\sqrt{n}},\overline{%s}+\frac{ts_{%s}}{\sqrt{n}}\right)\text{，代入得}\left(%s,%s\right)' % (self.__sym, self.__sym, self.__sym, self.__sym, (mean - unc).latex(), (mean + unc).latex()))
@@ -1005,17 +1005,17 @@ class NumItem():
                 if side == 'double':
                     latex.add(r'\text{对于双侧区间，}P=1-\frac{\alpha}{2}=%g\text{，查表得n=%d时，}t_{1-\alpha/2}(n-1)=t_{%g}(%d)=%.3f' % (confLevel, n, confLevel, n-1, tv))
                 else:
-                    latex.add(r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得n=%d时，}t_{1-\alpha}(n-1)=t_{%g}(%d)=%.3f" % (confLevel, repl(confLevel), n, repl(confLevel), n-1, tv))
+                    latex.add(r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得n=%d时，}t_{1-\alpha}(n-1)=t_{%g}(%d)=%.3f" % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
                 if tCal >= tv:
                     if side == 'double':
                         latex.add(r't>t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值有明显差异，存在系统误差}' % (confLevel, n-1, confLevel))
                     else:
-                        latex.add(r't>t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值有明显差异，存在系统误差}' % (repl(confLevel), n-1, confLevel))
+                        latex.add(r't>t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值有明显差异，存在系统误差}' % (t_repl(confLevel), n-1, confLevel))
                 else:
                     if side == 'double':
                         latex.add(r't<t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值无明显差异，测量结果误差由随机误差引起}' % (confLevel, n-1, confLevel))
                     else:
-                        latex.add(r't<t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值无明显差异，测量结果误差由随机误差引起}' % (repl(confLevel), n-1, confLevel))
+                        latex.add(r't<t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值无明显差异，测量结果误差由随机误差引起}' % (t_repl(confLevel), n-1, confLevel))
                 if needValue:
                     return tCal >= tv, latex
                 else:

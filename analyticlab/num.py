@@ -6,9 +6,9 @@ Created on Sun Jan 21 21:34:44 2018
 """
 
 from math import log10, fabs, floor
-from analyticlab.const import Const
-from analyticlab.system.numberformat import f, getDigitFront, getDigitBehind, getBound
-from analyticlab.system.exceptions import expressionInvalidException
+from .const import Const
+from .system.numberformat import f, getDigitFront, getDigitBehind, getBound
+from .system.exceptions import expressionInvalidException
 
 class Num():
     '''Num类为分析数值运算类，该类能够按照有效数字的保留和运算法则，进行数值的运算，即运算过程中会自动保留有效数字，最终运算结果按照有效数字位数输出。'''

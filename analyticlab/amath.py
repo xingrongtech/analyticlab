@@ -6,7 +6,7 @@ Created on Sat Feb 10 08:34:23 2018
 """
 
 import math, sympy
-import analyticlab.system.numberformat as nf
+from .system import numberformat as nf
 
 def sqrt(obj, root=2):
     '''求根计算
@@ -23,10 +23,10 @@ def sqrt(obj, root=2):
     ⑤LSymItem → LSymItem；
     ⑥Const → Const；
     ⑦Measure、Uncertainty → Uncertainty。'''
-    objType = str(type(obj))
-    if objType == "<class 'int'>" or objType == "<class 'float'>":
+    if type(obj) == int or type(obj) == float:
         return math.sqrt(obj)
-    elif objType == "<class 'analyticlab.num.Num'>":
+    objType = str(type(obj))
+    if objType == "<class 'analyticlab.num.Num'>":
         return obj.__pow__(1/root)
     elif objType == "<class 'analyticlab.numitem.NumItem'>":
         return obj._NumItem__newInstance([sqrt(n) for n in obj._NumItem__arr], dv=obj._NumItem__gd_valid)
@@ -83,10 +83,10 @@ def ln(obj):
     ⑤LSymItem → LSymItem；
     ⑥Const → Const；
     ⑦Measure、Uncertainty → Uncertainty。'''
-    objType = str(type(obj))
-    if objType == "<class 'int'>" or objType == "<class 'float'>":
+    if type(obj) == int or type(obj) == float:
         return math.log(obj)
-    elif objType == "<class 'analyticlab.num.Num'>":
+    objType = str(type(obj))
+    if objType == "<class 'analyticlab.num.Num'>":
         obj._Num__resetDigit()
         n = obj._Num__newInstance()
         n._Num__num = math.log(obj._Num__num)
@@ -154,10 +154,10 @@ def lg(obj):
     ⑤LSymItem → LSymItem；
     ⑥Const → Const；
     ⑦Measure、Uncertainty → Uncertainty。'''
-    objType = str(type(obj))
-    if objType == "<class 'int'>" or objType == "<class 'float'>":
+    if type(obj) == int or type(obj) == float:
         return math.log10(obj)
-    elif objType == "<class 'analyticlab.num.Num'>":
+    objType = str(type(obj))
+    if objType == "<class 'analyticlab.num.Num'>":
         obj._Num__resetDigit()
         n = obj._Num__newInstance()
         n._Num__num = math.log10(obj._Num__num)
@@ -212,10 +212,10 @@ def lg(obj):
         return obj._Uncertainty__newInstance(sympy.log(obj._Uncertainty__symbol, 10), obj._Uncertainty__measures, obj._Uncertainty__consts, obj._Uncertainty__lsyms, False)
     
 def __triFunc(obj, fun, selfFun, funExpr, mode):
-    objType = str(type(obj))
-    if objType == "<class 'int'>" or objType == "<class 'float'>":
+    if type(obj) == int or type(obj) == float:
         return fun(obj, mode)
-    elif objType == "<class 'analyticlab.num.Num'>":
+    objType = str(type(obj))
+    if objType == "<class 'analyticlab.num.Num'>":
         obj._Num__resetDigit()
         n = obj._Num__newInstance()
         n._Num__num = fun(obj._Num__num, mode)

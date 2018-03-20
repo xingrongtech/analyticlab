@@ -2,17 +2,15 @@
 """
 Created on Mon Jan 29 22:02:20 2018
 
-@author: wzv100
+@author: xingrongtech
 """
 
-from math import sqrt
-from analyticlab import amath
-from analyticlab.latexoutput import LaTeX
-from analyticlab.lookup.FTable import F
-from analyticlab.lookup.tTable import t
-from analyticlab.system import unitTreat
-from analyticlab.system.statformat import statFormat, getMaxDeltaDigit
-from analyticlab.system.exceptions import itemNotSameLengthException
+from .amath import sqrt
+from .latexoutput import LaTeX
+from .lookup import F, t
+from .system import unitTreat
+from .system.statformat import statFormat, getMaxDeltaDigit
+from .system.exceptions import itemNotSameLengthException
 
 def cov(X, Y, process=False, processWithMean=True, needValue=False, dec=False, remainOneMoreDigit=False):
     '''获得两组数据的协方差
@@ -177,13 +175,13 @@ def sigDifference(X, Y, confLevel=0.95, process=False, needValue=False):
     else:
         #再进行t检验：比较两组的平均值，是否有显著差异
         nX, nY = len(X._NumItem__arr), len(Y._NumItem__arr)
-        sp = sqrt(((nX-1)*s[0]**2 + (nY-1)*s[1]**2) / (nX+nY-2))
-        tCal = abs(X.mean(dec=True) - Y.mean(dec=True)) / sp * sqrt((nX*nY)/(nX+nY))
+        sp = (((nX-1)*s[0]**2 + (nY-1)*s[1]**2) / (nX+nY-2))**0.5
+        tCal = abs(X.mean(dec=True) - Y.mean(dec=True)) / sp * ((nX*nY)/(nX+nY))**0.5
         tv = t(confLevel, nX+nY-2)
         if process:
             latex.add(r'F<F_{%g}(%d,%d)\text{，表明两组测量结果的方差无显著性差异}' % (confLevel, n_min-1, n_max-1))
             latex.add(r'\bbox[gainsboro, 2px]{\text{【通过t检验，比较两组的均值】}}')
-            p_sp = amath.sqrt(((nX-1)*p_sX**2 + (nY-1)*p_sY**2) / (nX+nY-2))
+            p_sp = sqrt(((nX-1)*p_sX**2 + (nY-1)*p_sY**2) / (nX+nY-2))
             latex.add(r's_{p}=\sqrt{\frac{(n_{%s}-1)s_{%s}^2+(n_{%s}-1)s_{%s}^2}{n_{%s}+n_{%s}-2}}=\sqrt{\frac{(%d-1)\times {%s}^2+(%d-1)\times {%s}^2}{%d+%d-2}}=%s' % (symX, symX, symY, symY, symX, symY, nX, p_sX.latex(1), nY, p_sY.latex(1), nX, nY, p_sp.latex()))
             latex.add(r't=\frac{\left\lvert \overline{%s}-\overline{%s}\right\rvert}{s_{p}}\sqrt{\frac{n_{%s}n_{%s}}{n_{%s}+n_{%s}}}=\frac{\left\lvert %s-%s\right\rvert}{%s}\times\sqrt{\frac{%d\times %d}{%d+%d}}=%.3f' % (symX, symY, symX, symY, symX, symY, p_meanX.latex(), p_meanY.latex(2), p_sp.latex(), nX, nY, nX, nY, tCal))
             latex.add(r'P=1-\frac{\alpha}{2}=%g，n_{%s}=%d，n_{%s}=%d\text{，查表得：}t_{1-\alpha/2}(n_{%s}+n_{%s}-2)=t_{%g}(%d)=%.3f' % (confLevel, symX, nX, symY, nY, symX, symY, confLevel, nX+nY-2, t(confLevel, nX+nY-2)))

@@ -4,10 +4,10 @@ Created on Mon Feb  5 19:28:45 2018
 
 @author: xingrongtech
 """
-from analyticlab.num import Num
-from analyticlab.numitem import NumItem
-from analyticlab.lsym import LSym
-from analyticlab.system.exceptions import itemNotSameLengthException, itemNotSameTypeException, itemNotSameKeysException, expressionInvalidException
+from .num import Num
+from .numitem import NumItem
+from .lsym import LSym
+from .system.exceptions import itemNotSameLengthException, itemNotSameTypeException, itemNotSameKeysException, expressionInvalidException
 
 class LSymItem():
     '''LSymItem为LaTeX符号组类，该类能够按组批量计算并生成代数式、数值式的LaTeX表达式。'''

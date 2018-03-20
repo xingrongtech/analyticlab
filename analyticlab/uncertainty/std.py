@@ -5,9 +5,8 @@ Created on Tue Feb  6 10:18:22 2018
 @author: xingrongtech
 """
 
-from math import sqrt
-from analyticlab.system.statformat import statFormat, getMaxDeltaDigit
-from analyticlab.lookup.RangeTable import C as rC
+from ..system.statformat import statFormat, getMaxDeltaDigit
+from ..lookup.RangeTable import C as rC
 
 def Bessel(item, remainOneMoreDigit=False):
     '''贝塞尔公式法计算标准偏差
@@ -18,7 +17,7 @@ def Bessel(item, remainOneMoreDigit=False):
     Num：标准偏差数值。'''
     mean = item.mean()
     dsum = sum([(ni._Num__num - mean._Num__num)**2 for ni in item._NumItem__arr])
-    s = sqrt(dsum / (len(item._NumItem__arr) - 1))
+    s = (dsum / (len(item._NumItem__arr) - 1))**0.5
     result = statFormat(getMaxDeltaDigit(item, mean), s)
     if remainOneMoreDigit:
         result.remainOneMoreDigit()
