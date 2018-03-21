@@ -1,9 +1,5 @@
 from time import clock
-from analyticlab import twoitems, outlier
-from analyticlab.numitem import NumItem
-from analyticlab.lsymitem import LSymItem
-from analyticlab.uncertainty import ACategory, BCategory, ins
-from analyticlab.uncertainty.measure import Measure
+from analyticlab import NumItem, LSymItem, ACategory, BCategory, ins, Measure, cov, corrCoef, sigDifference, outlier
 
 Al_real = '10.70'
 Al = NumItem('10.69 10.26 10.71 10.72', Al_real, sym='m_{1}', unit='g')
@@ -43,9 +39,9 @@ test(lambda: Al.samConfIntv(), '双侧置信区间')
 test(lambda: Al.samConfIntv(confLevel=0.6826, side='left'), '左侧置信区间')
 test(lambda: Al.samConfIntv(confLevel=0.6826, side='right'), '右侧置信区间')
 test(lambda: Al.tTest(), 't检验')
-test(lambda: twoitems.cov(Al_1, Al_2), '协方差')
-test(lambda: twoitems.corrCoef(Al_1, Al_2), '相关系数')
-test(lambda: twoitems.sigDifference(Al_1, Al_2), '两组数据的显著性差异')
+test(lambda: cov(Al_1, Al_2), '协方差')
+test(lambda: corrCoef(Al_1, Al_2), '相关系数')
+test(lambda: sigDifference(Al_1, Al_2), '两组数据的显著性差异')
 test(lambda: outlier.Nair(Al_3, 0.65, side='up'), 'Nair检验')
 test(lambda: outlier.Grubbs(Al_4), 'Grubbs检验')
 test(lambda: outlier.Dixon(Al_5), 'Dixon检验')
