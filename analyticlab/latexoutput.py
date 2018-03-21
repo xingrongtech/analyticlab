@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Mon Feb  5 08:41:19 2018
 
@@ -61,16 +61,51 @@ class LaTeX(object):
         return lExpr
     
     def addTable(self, table):
+        '''添加一个简单格式的表格。表格的格式为m行n列，列宽由公式长度而定，公式居中。
+        【参数说明】
+        table（list<str>）：由表格各个单元格的内容（字符串格式）组成的二维列表，该列表的第一维度为行，第二维度为列。'''
         self.add(dispTable(table))
         
     def addLSym(self, lsym, resSym=None, resUnit=None):
+        '''添加一个LSym计算过程（根据原始LSym是否有符号和对应数值，决定是否显示符号表达式、计算表达式和计算结果）
+        【参数说明】
+        1.lSym（LSym）：要展示的LaTeX符号。通过lSym，可以获得符号表达式、计算表达式和计算结果数值。
+        2.resSym（可选，str）：计算结果的符号。当不给出符号时，生成的计算过程将只有代数表达式和数值表达式，而没有计算结果的符号。默认resSym=None。
+        3.resUnit（可选，str）：计算结果的单位。当只展示符号表达式时，没必要给出计算结果的单位；若计算表达式和计算结果需要展示，则可选择是否给出resUnit。默认resUnit=None。'''
         self.add(dispLSym(lsym, resSym, resUnit))
         
     def addLSymItem(self, lSymItem, resSym=None, resUnit=None, headExpr='根据公式$%s$，得', showMean=True, meanExpr=None):
+        '''添加一个LSymItem计算过程（包括符号表达式和计算表达式）
+        【参数说明】
+        1.lSymItem（LSymItem）：要展示的LaTeX符号组。通过lSymItem，可以获得符号表达式、计算表达式和计算结果数值。
+        2.resSym（可选，str）：计算结果的符号。当不给出符号时，生成的计算过程将只有代数表达式和数值表达式，而没有计算结果的符号。默认resSym=None。
+        3.resUnit（可选，str）：计算结果的单位。默认resUnit=None。
+        4.headExpr（可选，str）：当符号表达式与计算表达式相分离时，对符号表达式进行语言修饰；当符号表达式与计算表达式在同一个等式中展示出来时，该参数无意义。默认headExpr='根据公式$%s$，得'。
+        5.showMean（可选，bool）：是否展示符号组中各运算结果的均值及其运算过程。默认showMean=True。
+        6.meanExpr（可选，str）：对均值的计算式进行语言修饰。默认meanExpr=None，即没有语言修饰。'''
         self.add(dispLSymItem(lSymItem, resSym, resUnit, headExpr, showMean, meanExpr))
         
     def addUnc(self, resUnc, resValue, resSym=None, resUnit=None, resDescription=None):
+        '''添加不确定度的计算过程
+        【参数说明】
+        1.resUnc（Uncertainty或Measure）：最终测量结果的不确定度。
+        2.resValue（Num）：最终测量结果的数值。
+        3.resSym（可选，str）：最终测量结果的符号。当resUnc为Measure时，不需要给出，否则必须给出。默认resSym=None。
+        4.resUnit（可选，str）：最终测量结果的单位。当resUnc为Measure时，不需要给出，否则必须给出。默认resUnit=None。
+        5.resDescription（可选，str）：对最终测量结果的描述。默认resDescription=None。'''
         self.add(dispUnc(resUnc, resValue, resSym, resUnit, resDescription))
+        
+    def addRelErr(self, num, mu, sym=None, muSym=None, ESym='E_r'):
+        '''添加相对误差的计算过程
+        【参数说明】
+        1.num和mu分别为测量值和真值。num、mu可以是以下数据类型：
+        (1)Num：直接给出测量值、真值对应的数值
+        (2)str：通过给出测量值、真值的字符串表达式，得到对应数值。
+        (3)LSym：给出测量值、真值的LaTeX符号，得到对应数值。
+        2.sym（可选，str）：测量值的符号。当测量值以LSym形式给出时，可不给出测量值符号，此时将使用num的符号作为测量值符号；否则必须给出符号。默认sym=None。
+        3.muSym（可选，str）：真值的符号。当真值以LSym形式给出时，可不给出真值符号，此时将使用mu的符号作为真值符号；否则默认muSym为'\mu'。默认muSym=None。
+        4.ESym（可选，str）：相对误差的符号。当给出相对误差的符号时，会在输出的表达式中加入相对误差符号那一项；当ESym为None时，没有那一项。默认ESym='E_r'。'''
+        self.add(dispRelErr(num, mu, sym, muSym, ESym))
 
 def dispTable(table):
     '''展示一个简单格式的表格。表格的格式为m行n列，列宽由公式长度而定，公式居中。
@@ -175,7 +210,7 @@ def dispLSymItem(lSymItem, resSym=None, resUnit=None, headExpr='根据公式$%s$
     return latex
             
 def dispUnc(resUnc, resValue, resSym=None, resUnit=None, resDescription=None):
-    '''输出不确定度
+    '''展示不确定度
     【参数说明】
     1.resUnc（Uncertainty或Measure）：最终测量结果的不确定度。
     2.resValue（Num）：最终测量结果的数值。
@@ -236,3 +271,46 @@ def dispUnc(resUnc, resValue, resSym=None, resUnit=None, resDescription=None):
         finalExpr += r'\qquad {\rm P=%s}' % res['P'][0]
     latex.add(finalExpr)
     return latex
+
+def dispRelErr(num, mu, sym=None, muSym=None, ESym='E_r'):
+    '''展示相对误差
+    【参数说明】
+    1.num和mu分别为测量值和真值。num、mu可以是以下数据类型：
+    (1)Num：直接给出测量值、真值对应的数值
+    (2)str：通过给出测量值、真值的字符串表达式，得到对应数值。
+    (3)LSym：给出测量值、真值的LaTeX符号，得到对应数值。
+    2.sym（可选，str）：测量值的符号。当测量值以LSym形式给出时，可不给出测量值符号，此时将使用num的符号作为测量值符号；否则必须给出符号。默认sym=None。
+    3.muSym（可选，str）：真值的符号。当真值以LSym形式给出时，可不给出真值符号，此时将使用mu的符号作为真值符号；否则不给出真值符号时，会用真值数值取代muSym。默认muSym=None。
+    4.ESym（可选，str）：相对误差的符号。当给出相对误差的符号时，会在输出的表达式中加入相对误差符号那一项；当ESym为None时，没有那一项。默认ESym='E_r'。
+    【返回值】
+    LaTeX：相对误差的公式集。'''
+    #当num不是Num数值类型时，将其转换为Num类型
+    if type(num) == analyticlab.Num:
+        pass
+    elif type(num) == str:
+        num = analyticlab.Num(num)
+    elif type(num) == analyticlab.LSym:
+        if sym == None:
+            sym = num.sym()
+        num = num.num()
+    else:
+        raise expressionInvalidException('数值num参数无效')
+    #当mu不是Num数值类型时，将其转换为Num类型
+    if type(mu) == analyticlab.Num:
+        pass
+    elif type(mu) == str:
+        mu = analyticlab.Num(mu)
+    elif type(mu) == analyticlab.LSym:
+        if muSym == None:
+            muSym = mu.sym()
+        mu = mu.num()
+    else:
+        raise expressionInvalidException('真值mu参数无效')
+    if muSym == None:
+        muSym = num.latex()
+    rel = abs(num - mu) / mu
+    rel._Num__isRelative = True
+    if ESym == None:
+        return LaTeX(r'\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (sym, muSym, muSym, num.latex(), mu.latex(), mu.latex(), rel.latex()))
+    else:
+        return LaTeX(r'%s=\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (ESym, sym, muSym, muSym, num.latex(), mu.latex(), mu.latex(), rel.latex()))
