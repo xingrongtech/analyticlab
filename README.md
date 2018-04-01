@@ -29,7 +29,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的Python库
 * uncertainty.ACategory：计算A类不确定度。
 * uncertainty.BCategory：计算B类不确定度。
 
-类的主要功能和绝大多数函数支持process（显示计算过程），通过在调用类方法或函数时，附加参数`process=True`，将得到的计算过程传递给LaTeX公式集类，并通过调用公式集的`show()`方法来实现。哪些类方法和函数支持process，可以通过help函数查询其说明文档。注意计算过程是以LaTeX格式输出的，因此只有在Jupyter Notebook环境下，才能显示计算过程。
+类的主要功能和绝大多数函数支持process（显示计算过程），通过在调用类方法或函数时，附加参数`process=True`实现。具体哪些类方法和函数支持process，可以查阅使用教程，或者通过help函数查询其说明文档。注意计算过程是以LaTeX格式输出的，因此只有在Jupyter Notebook环境下，才能显示计算过程。
 
 如何安装或更新
 ----
