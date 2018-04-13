@@ -49,7 +49,7 @@ analyticlab是一个实验数据计算、分析和计算过程展示的Python库
 
 运行环境
 ----
-analyticlab只能在Python 3.x环境下运行，不支持Python 2.x环境。要求系统已安装scipy库。可以在绝大多数Python平台下运行，但计算过程只有在Jupyter Notebook环境下才能显示出来。
+analyticlab只能在Python 3.x环境下运行，不支持Python 2.x环境。要求系统已安装numpy、scipy、sympy库。可以在绝大多数Python平台下运行，但计算过程只有在Jupyter Notebook环境下才能显示出来。
 
 参照标准文件
 ----
