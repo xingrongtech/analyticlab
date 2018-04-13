@@ -26,6 +26,12 @@ def f(num, digit):
             else:  #奇数进一
                 numInt = (numInt - unit) // 10 + 1
     return numInt * 10**(-digit)
+    
+def fstr(num, digit):
+    if digit > 0:
+        return ('%.' + digit + 'f') % f(num, digit)
+    else:
+        return '%d' % f(num, digit)
 
 def cutInt(number):
     '''去除数字的整数部分'''
