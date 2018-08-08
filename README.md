@@ -1,4 +1,4 @@
-【重大通知】为了给接下来误差计算相关功能的开发作准备，避免类与模块的混淆，从0.2.6版本开始，与不确定度计算有关的类Ins、Measure、Uncertainty以及函数模块std、ACategory、BCategory将不再归于analyticlab根目录下，而是统一归于uncertainty类目录下，即诸如`from analyticlab import Measure`的导入将无法实现， 而需要通过`from analyticlab.uncertainty import Measure`来实现。
+【重要通知】为了给接下来误差计算相关功能的开发作准备，避免类与模块的混淆，从0.2.6版本开始，与不确定度计算有关的类Ins、Measure、Uncertainty以及函数模块std、ACategory、BCategory将不再归于analyticlab根目录下，而是统一归于uncertainty类目录下，即诸如`from analyticlab import Measure`的导入将无法实现， 而需要通过`from analyticlab.uncertainty import Measure`来实现。
 
 
 analyticlab（分析实验室）
