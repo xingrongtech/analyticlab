@@ -25,7 +25,7 @@ class NumItem():
     __gd_valid = 0
     __isRelative = False
     
-    def __init__(self, nums, mu=None, isRelative=False, sym='x', unit=None, muSym=r'\mu'):
+    def __init__(self, nums, mu=None, isRelative=False, sym=None, unit=None, muSym=r'\mu'):
         '''初始化一个NumItem数组
         【参数说明】
         1.nums：要初始化的数值，可以是str或list：
@@ -89,7 +89,10 @@ class NumItem():
             self.__muSym = muSym
         if len(self.__arr) > 0:
             self.__findGeneralValid()
-        self.__sym = '{' + sym + '}'
+        if sym == None:
+            self.__sym = '{x_{%d}}' % id(self)
+        else:
+            self.__sym = '{' + sym + '}'
         self.__unit = unit
         
     def __newInstance(self, arr, mu=None, isRelative=False, sym='{x}', unit=None, dv=None):
