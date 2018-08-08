@@ -1,3 +1,6 @@
+重要通知：为了给接下来误差计算相关功能的开发作准备，避免类与模块的混淆，从0.2.6版本开始，与不确定度计算有关的类Ins、Measure、Uncertainty以及函数模块std、ACategory、BCategory将不再归于analyticlab根目录下，而是统一归于uncertainty类目录下，即诸如`from analyticlab import Measure`的导入将无法实现， 而需要通过`from analyticlab.uncertainty import Measure`来实现！
+
+
 analyticlab（分析实验室）
 ====
 analyticlab是一个实验数据计算、分析和计算过程展示的Python库，可应用于大学物理实验、分析化学等实验类学科以及大创、工艺流程等科技类竞赛的数据处理。该库包含以下5个部分：
@@ -16,9 +19,9 @@ analyticlab是一个实验数据计算、分析和计算过程展示的Python库
 * LSymItem：LaTeX符号组类，位于lsymitem模块。
 * Const：常数类，位于const模块。
 * LaTeX：公式集类，位于latexoutput模块。
-* Ins：测量仪器类，位于uncertainty.ins模块。
-* Measure：测量类，位于uncertainty.measure模块。
-* Uncertainty：不确定度类，位于uncertainty.unc模块。
+* uncertainty.Ins：测量仪器类，位于uncertainty.ins模块。
+* uncertainty.Measure：测量类，位于uncertainty.measure模块。
+* uncertainty.Uncertainty：不确定度类，位于uncertainty.unc模块。
 
 7个函数模块：
 * amath：对数值、符号、测量的求根、对数、三角函数运算。
