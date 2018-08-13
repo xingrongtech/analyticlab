@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Tue Feb  6 20:04:16 2018
 
@@ -113,7 +113,10 @@ class Measure(unc.Uncertainty):
                 self.__sym = '{' + sym + '}'
                 self.__data._NumItem__sym = self.__sym
         else:
-            self.__sym = '{' + sym + '}'
+            if sym == None:
+                self.__sym = '{x_{%d}}' % id(self)
+            else:
+                self.__sym = '{' + sym + '}'
         self._Uncertainty__symbol = Symbol(self.__sym, real=True)
         self._Uncertainty__measures = {}
         self._Uncertainty__lsyms = {}
