@@ -48,3 +48,11 @@ class keyNotInTableException(BaseException):
 class processStateWrongException(BaseException):
     def __init__(self):
         print('Uncertainty.process没有初始化为True，不能展示不确定度')
+        
+class subUnsupportedException(BaseException):
+    def __init__(self, char):
+        print('不支持字符\'%s\'的上标' % char)
+        
+class supUnsupportedException(BaseException):
+    def __init__(self, char):
+        print('不支持字符\'%s\'的下标' % char)

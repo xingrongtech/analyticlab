@@ -12,7 +12,7 @@ from .numberformat import getDigitFront, getDigitBehind
 def statFormat(gd_valid, number, isRelative=False):
     '''统计结果格式化'''
     s = Num(None)
-    s._Num__num = number
+    s._Num__value = number
     usign = fabs(number)
     s._Num__d_valid = gd_valid
     s._Num__d_front = getDigitFront(number)

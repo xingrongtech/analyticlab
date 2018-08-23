@@ -8,7 +8,6 @@ Created on Mon Jan 29 22:02:20 2018
 from .amath import sqrt
 from .latexoutput import LaTeX
 from .lookup import F, t
-from .system import unitTreat
 from .system.statformat import statFormat, getMaxDeltaDigit
 from .system.exceptions import itemNotSameLengthException
 
@@ -40,15 +39,16 @@ def cov(X, Y, process=False, processWithMean=True, needValue=False, dec=False, r
     meanX, meanY = X.mean(), Y.mean()
     dsum = 0
     for i in range(n):
-        dsum += (rX[i]._Num__num - meanX._Num__num) * (rY[i]._Num__num - meanY._Num__num)
+        dsum += (rX[i]._Num__value - meanX._Num__value) * (rY[i]._Num__value - meanY._Num__value)
     if dec:
-    	return dsum / (n - 1)
+        return dsum / (n - 1)
     else:
         if process and processWithMean:
             meanX, lsub1 = X.mean(process=True, needValue=True)
             meanY, lsub2 = Y.mean(process=True, needValue=True)
         res = dsum / (n - 1)
         result = statFormat(min(getMaxDeltaDigit(X, meanX), getMaxDeltaDigit(Y, meanY)), res)
+        result._Num__q = X._NumItem__q * Y._NumItem__q
         if remainOneMoreDigit:
             result.remainOneMoreDigit()
         if process:
@@ -57,22 +57,21 @@ def cov(X, Y, process=False, processWithMean=True, needValue=False, dec=False, r
                 latex.add([lsub1, lsub2])
             symX, symY = X._NumItem__sym, Y._NumItem__sym
             sumExpr = ''
-            unitExpr = r'{\rm %s}' % unitTreat.mul(X._NumItem__unit, Y._NumItem__unit)
             sciDigit = max(X._NumItem__sciDigit(), Y._NumItem__sciDigit())
             if sciDigit == 0:
                 for i in range(n):
-                    sumExpr += r'%s\times%s+' % ((X[i] - meanX).latex(1), (Y[i] - meanY).latex(1))
+                    sumExpr += r'%s\times%s+' % ((X[i] - meanX).dlatex(1), (Y[i] - meanY).dlatex(1))
                 sumExpr = sumExpr[:-1]
-                latex.add(r's(%s,%s)=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, result.latex() + unitExpr))
+                latex.add(r's(%s,%s)=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, result.latex()))
             else:
                 dX = X * 10**(-sciDigit)
                 dY = Y * 10**(-sciDigit)
                 dmeanX = meanX * 10**(-sciDigit)
                 dmeanY = meanY * 10**(-sciDigit)
                 for i in range(n):
-                    sumExpr += r'%s\times%s+' % ((dX[i] - dmeanX).latex(1), (dY[i] - dmeanY).latex(1))
+                    sumExpr += r'%s\times%s+' % ((dX[i] - dmeanX).dlatex(1), (dY[i] - dmeanY).dlatex(1))
                 sumExpr = sumExpr[:-1]
-                latex.add(r's(%s,%s)=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, sciDigit*2, result.latex() + unitExpr))
+                latex.add(r's(%s,%s)=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, sciDigit*2, result.latex()))
             if needValue:
                 return result, latex
             else:
@@ -111,7 +110,7 @@ def corrCoef(X, Y, process=False, needValue=False, remainOneMoreDigit=False):
         result.cutOneDigit()
     if process:
         symX, symY = X._NumItem__sym, Y._NumItem__sym
-        latex.add(r'r(%s,%s)=\frac{s(%s,%s)}{s_{%s}s_{%s}}=\frac{%s}{%s\times %s}=%s' % (symX, symY, symX, symY, symX, symY, sXY.latex(), sX.latex(2), sY.latex(2), result.latex()))
+        latex.add(r'r(%s,%s)=\frac{s(%s,%s)}{s_{%s}s_{%s}}=\frac{%s}{%s\times %s}=%s' % (symX, symY, symX, symY, symX, symY, sXY.dlatex(), sX.dlatex(2), sY.dlatex(2), result.latex()))
         if needValue:
             return result, latex
         else:
@@ -151,7 +150,7 @@ def sigDifference(X, Y, confLevel=0.95, process=False, needValue=False):
     sDifferent = (FCal >= F(confLevel, n_min-1, n_max-1))
     if process:
         symX, symY = X._NumItem__sym, Y._NumItem__sym
-        latex = LaTeX(r'\bbox[gainsboro, 2px]{\text{【通过F检验，比较两组的精密度】}}')
+        latex = LaTeX(r'\bbox[gainsboro, 2px]{\text{【通过$F$检验，比较两组的精密度】}}')
         p_meanX, p_meanY = X.mean(), Y.mean()
         p_sX, lsub1 = X.staDevi(process=True, needValue=True, remainOneMoreDigit=True)
         p_sY, lsub2 = Y.staDevi(process=True, needValue=True, remainOneMoreDigit=True)
@@ -159,10 +158,10 @@ def sigDifference(X, Y, confLevel=0.95, process=False, needValue=False):
         #比较方差大小
         if (p_sX >= p_sY):
             latex.add(r'\text{其中}s_{%s}>s_{%s}\text{，故}s_{\rm max}=s_{%s}\text{，}s_{\rm min}=s_{%s}' % (symX, symY, symX, symY))
-            latex.add(r'F=\frac{s_{\rm max}^2}{s_{\rm min}^2}=\frac{{%s}^2}{{%s}^2}=%.3f' % (p_sX.latex(1), p_sY.latex(1), FCal))
+            latex.add(r'F=\frac{s_{\rm max}^2}{s_{\rm min}^2}=\frac{{%s}^2}{{%s}^2}=%.3f' % (p_sX.dlatex(1), p_sY.dlatex(1), FCal))
         else:
             latex.add(r'\text{其中}s_{%s}<s_{%s}\text{，故}s_{\rm max}=s_{%s}\text{，}s_{\rm min}=s_{%s}' % (symX, symY, symY, symX))
-            latex.add(r'F=\frac{s_{\rm max}^2}{s_{\rm min}^2}=\frac{{%s}^2}{{%s}^2}=%.3f' % (p_sY.latex(1), p_sX.latex(1), FCal))
+            latex.add(r'F=\frac{s_{\rm max}^2}{s_{\rm min}^2}=\frac{{%s}^2}{{%s}^2}=%.3f' % (p_sY.dlatex(1), p_sX.dlatex(1), FCal))
         latex.add(r'P=1-\frac{\alpha}{2}=%g\text{，}n_{\rm min}=%d\text{，}n_{\rm max}=%d\text{，查表得：}F_{1-\alpha/2}(n_{\rm min}-1,n_{\rm max}-1)=F_{%g}(%d,%d)=%.3f' % (confLevel, n_min, n_max, confLevel, n_min-1, n_max-1, F(confLevel, n_min-1, n_max-1)))
     if sDifferent:
         if process:
@@ -180,10 +179,10 @@ def sigDifference(X, Y, confLevel=0.95, process=False, needValue=False):
         tv = t(confLevel, nX+nY-2)
         if process:
             latex.add(r'F<F_{%g}(%d,%d)\text{，表明两组测量结果的方差无显著性差异}' % (confLevel, n_min-1, n_max-1))
-            latex.add(r'\bbox[gainsboro, 2px]{\text{【通过t检验，比较两组的均值】}}')
+            latex.add(r'\bbox[gainsboro, 2px]{\text{【通过$t$检验，比较两组的均值】}}')
             p_sp = sqrt(((nX-1)*p_sX**2 + (nY-1)*p_sY**2) / (nX+nY-2))
-            latex.add(r's_{p}=\sqrt{\frac{(n_{%s}-1)s_{%s}^2+(n_{%s}-1)s_{%s}^2}{n_{%s}+n_{%s}-2}}=\sqrt{\frac{(%d-1)\times {%s}^2+(%d-1)\times {%s}^2}{%d+%d-2}}=%s' % (symX, symX, symY, symY, symX, symY, nX, p_sX.latex(1), nY, p_sY.latex(1), nX, nY, p_sp.latex()))
-            latex.add(r't=\frac{\left\lvert \overline{%s}-\overline{%s}\right\rvert}{s_{p}}\sqrt{\frac{n_{%s}n_{%s}}{n_{%s}+n_{%s}}}=\frac{\left\lvert %s-%s\right\rvert}{%s}\times\sqrt{\frac{%d\times %d}{%d+%d}}=%.3f' % (symX, symY, symX, symY, symX, symY, p_meanX.latex(), p_meanY.latex(2), p_sp.latex(), nX, nY, nX, nY, tCal))
+            latex.add(r's_{p}=\sqrt{\frac{(n_{%s}-1)s_{%s}^2+(n_{%s}-1)s_{%s}^2}{n_{%s}+n_{%s}-2}}=\sqrt{\frac{(%d-1)\times {%s}^2+(%d-1)\times {%s}^2}{%d+%d-2}}=%s' % (symX, symX, symY, symY, symX, symY, nX, p_sX.dlatex(1), nY, p_sY.dlatex(1), nX, nY, p_sp.latex()))
+            latex.add(r't=\frac{\left\lvert \overline{%s}-\overline{%s}\right\rvert}{s_{p}}\sqrt{\frac{n_{%s}n_{%s}}{n_{%s}+n_{%s}}}=\frac{\left\lvert %s-%s\right\rvert}{%s}\times\sqrt{\frac{%d\times %d}{%d+%d}}=%.3f' % (symX, symY, symX, symY, symX, symY, p_meanX.dlatex(), p_meanY.dlatex(2), p_sp.dlatex(), nX, nY, nX, nY, tCal))
             latex.add(r'P=1-\frac{\alpha}{2}=%g，n_{%s}=%d，n_{%s}=%d\text{，查表得：}t_{1-\alpha/2}(n_{%s}+n_{%s}-2)=t_{%g}(%d)=%.3f' % (confLevel, symX, nX, symY, nY, symX, symY, confLevel, nX+nY-2, t(confLevel, nX+nY-2)))
             if tCal >= tv:
                 latex.add(r't>t_{%g}(%d)\text{，说明两组测量结果的均值有明显差异，不属于同一群体，两者之间存在系统误差}' % (confLevel, nX+nY-2))

@@ -4,9 +4,14 @@ Created on Mon Feb  5 19:28:45 2018
 
 @author: xingrongtech
 """
+
+from quantities.quantity import Quantity
 from .num import Num
+from .const import Const
 from .numitem import NumItem
 from .lsym import LSym
+from .system.unit_open import openUnit, closeUnit
+from .system.format_units import format_units_unicode, format_units_latex
 from .system.exceptions import itemNotSameLengthException, itemNotSameTypeException, itemNotSameKeysException, expressionInvalidException
 
 class LSymItem():
@@ -16,9 +21,9 @@ class LSymItem():
     __lsyms = []
     __sepSym = None
     __index = 0
-    __symText = None
+    __q = 1
     
-    def __init__(self, sym, sNumItem, subs=None):
+    def __init__(self, sym, sNumItem, unit=None, subs=None):
         '''初始化一个LSymItem符号组
         【参数说明】
         1.sym（str）：符号组的符号。
@@ -26,23 +31,28 @@ class LSymItem():
         (1)NumItem：直接给出符号组对应的NumItem数组。
         (2)str：对于还没有转换成Num的数值，将数值以空格隔开，表示成字符串表达式，以此生成符号组对应的NumItem数组。
         (3)list<Num>：对于已经转换成Num的数值，将数值用list表示出，以此生成符号组对应的NumItem数组。
-        (4)list<int>或list<float>：给出一组纯数字组成的list。
-        3.subs（可选，str）：符号组中每个符号的下标，以空格隔开。在LSymItem.sepSymCalc为False的前提下，当subs为None时，会按照0、1、2...给每个符号索引，1、2、3...给每个符号编号；给出subs时，按照subs中给出的编号给每个符号索引和编号。默认subs=None。
-        '''
+        3.unit（可选，str）：单位。当unit为None时，会选择list<Num>中第1个元素的unit，或者NumItem的unit作为LSymItem的unit，否则没有单位。默认unit=None。
+        4.subs（可选，str）：符号组中每个符号的下标，以空格隔开。在LSymItem.sepSymCalc为False的前提下，当subs为None时，会按照0、1、2...给每个符号索引，1、2、3...给每个符号编号；给出subs时，按照subs中给出的编号给每个符号索引和编号。默认subs=None。'''
         if sym == None and sNumItem == None:
             return
-        self.__symText = sym
-        if type(sNumItem) == str or (type(sNumItem) == list and type(sNumItem[0]) == Num):
+        if unit != None:
+            self.__q = Quantity(1., unit) if type(unit) == str else unit
+        if type(sNumItem) == str:
             try:
                 sNumItem = NumItem(sNumItem)
             except:
                 raise expressionInvalidException('用于创建符号组的数组部分的参数无效')
+        elif type(sNumItem) == list and type(sNumItem[0]) == Num:
+            if unit == None:
+                self.__q = sNumItem[0]._Num__q
         elif type(sNumItem) == NumItem:
-            pass
-        elif type(sNumItem) == list and (type(sNumItem[0]) == int or type(sNumItem[0]) == float):
-            pass
+            if unit == None:
+                self.__q = sNumItem._NumItem__arr[0]._Num__q
         else:
             raise expressionInvalidException('用于创建符号组的参数无效')
+        if unit != None:
+            for ni in sNumItem:
+                ni._Num__q = self.__q
         if LSymItem.sepSymCalc:  #将代数表达式与数值表达式分离
             if subs == None:  #未给出下标时，lsyms为list
                 self.__lsyms = [LSym(None, ni) for ni in sNumItem]
@@ -65,8 +75,7 @@ class LSymItem():
                     raise itemNotSameLengthException('给出subs时，sNumItem和subs必须为等长列表')
                 self.__lsyms = {}
                 for i in range(len(sNumItem)):
-                    self.__lsyms[subs[i]] = LSym('{%s}_{%s}' % (sym, subs[i]), sNumItem[i])
-    
+                    self.__lsyms[subs[i]] = LSym('{%s}_{%s}' % (sym, subs[i]), sNumItem._NumItem__arr[i])            
     
     def refreshSym(self, sym):
         '''更新符号
@@ -82,7 +91,7 @@ class LSymItem():
             elif str(type(li._LSym__sNum)) == "<class 'analyticlab.num.Num'>":
                 if li._LSym__sNum._Num__sciDigit() != 0:
                     li._LSym__calPrior = 2
-                li._LSym__calText = '{' + li._LSym__sNum.latex() + '}'
+                li._LSym__calText = '{' + li._LSym__sNum.dlatex() + '}'
             if li._LSym__sNum != None:  #如果是原始符号，则需要考虑是否因为负数或科学记数法而需要改变prior的情形
                 if li._LSym__sNum < 0:  #负数prior为0
                     li._LSym__calPrior = 0
@@ -114,6 +123,14 @@ class LSymItem():
     def __newInstance(self):
         return LSymItem(None, None)
     
+    def __qUpdate(self):
+        if type(self.__lsyms) == list:
+            for li in self.__lsyms:
+                li._LSym__sNum._Num__q = self.__q
+        else:
+            for li in self.__lsyms.values():
+                li._LSym__sNum._Num__q = self.__q
+    
     def __sepSymCalc(self):
         return LSymItem.sepSymCalc
         
@@ -125,6 +142,7 @@ class LSymItem():
             new.__lsyms = self.__lsyms[index]
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym
+            new.__q = self.__q
             return new
     
     def __len__(self):
@@ -138,6 +156,37 @@ class LSymItem():
             result = self.__lsyms[self.__index]
             self.__index += 1
             return result
+        
+    def __str__(self):
+        '''获得LaTeX符号组的描述'''
+        if LSymItem.sepSymCalc:
+            expr = '%s -> [%s]' % (self.__sepSym, ', '.join([li._LSym__calText for li in self.__lsyms]))
+        else:
+            expr = '['
+            if type(self.__lsyms) == list:
+                expr += ', '.join(['`%s`->`%s`' % (li._LSym__symText, li._LSym__calText) for li in self.__lsyms])
+            else:
+                expr += ', '.join(['%s: `%s`->`%s`' % (ki, self.__lsyms[ki]._LSym__symText, self.__lsyms[ki]._LSym__calText) for ki in self.__lsyms.keys()])
+            expr += ']'
+        unitExpr = format_units_unicode(self.__q)
+        if unitExpr != '':
+            expr += ' ' + unitExpr
+        return expr
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    def _repr_latex_(self):
+        if LSymItem.sepSymCalc:
+            expr = r'%s \to \left[%s\right]' % (self.__sepSym, ','.join([li._LSym__calText for li in self.__lsyms]))
+        else:
+            expr = r'\left['
+            if type(self.__lsyms) == list:
+                expr += ','.join([r'%s \to %s' % (li._LSym__symText, li._LSym__calText) for li in self.__lsyms])
+            else:
+                expr += ','.join([r'%s: %s \to %s' % (ki, self.__lsyms[ki]._LSym__symText, self.__lsyms[ki]._LSym__calText) for ki in self.__lsyms.keys()])
+            expr += r'\right]'
+        return '$%s%s$' % (expr, format_units_latex(self.__q))
     
     def getSepSym(self):
         '''当代数表达式与数值表达式分离时，用于获得分离出来的LaTeX符号。
@@ -145,6 +194,17 @@ class LSymItem():
         LSym：分离出来的LaTeX符号。
         '''
         return self.__sepSym
+    
+    def resetUnit(self, unit=None):
+        '''重设LSymItem符号组中各符号对应数值的单位
+        【参数说明】
+        unit（可选，str）：重设后的单位。默认unit=None，即没有单位。'''
+        if self.__sNum != None:
+            if unit == None:
+                self.__q = 1
+            else:
+                self.__q = Quantity(1., unit) if type(unit) == str else unit
+            self.__qUpdate()
         
     def __abs__(self):
         new = LSymItem(None, None)
@@ -154,6 +214,7 @@ class LSymItem():
             new.__lsyms = {ki: self.__lsyms[ki].__abs__() for ki in self.__lsyms.keys()}
         if LSymItem.sepSymCalc:
             new.__sepSym = self.__sepSym.__abs__()
+        new.__q = self.__q
         return new
         
     def __neg__(self):
@@ -164,6 +225,7 @@ class LSymItem():
             new.__lsyms = {ki: self.__lsyms[ki].__neg__() for ki in self.__lsyms.keys()}
         if LSymItem.sepSymCalc:
             new.__sepSym = self.__sepSym.__neg__()
+        new.__q = self.__q
         return new
         
     def __add__(self, obj):
@@ -193,6 +255,7 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__add__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__add__(obj)
+        new.__q = self.__q
         return new
     
     def __radd__(self, obj):
@@ -222,6 +285,7 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__radd__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__radd__(obj)
+        new.__q = self.__q
         return new
     
     def __sub__(self, obj):
@@ -251,6 +315,7 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__sub__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__sub__(obj)
+        new.__q = self.__q
         return new
     
     def __rsub__(self, obj):
@@ -280,9 +345,11 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__rsub__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rsub__(obj)
+        new.__q = self.__q
         return new
     
     def __mul__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -302,6 +369,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__mul__(obj.__sepSym)
+            new.__q = self.__q * obj.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__mul__(obj) for ni in self.__lsyms]
@@ -309,9 +377,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__mul__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__mul__(obj)
+            if type(obj) == LSym:
+                new.__q = self.__q * obj._LSym__sNum._Num__q
+            elif type(obj) == Const:
+                new.__q = self.__q * obj._Const__q
+            else:
+                new.__q = self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __rmul__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -331,6 +408,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rmul__(obj.__sepSym)
+            new.__q = obj.__q * self.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__rmul__(obj) for ni in self.__lsyms]
@@ -338,9 +416,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__rmul__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rmul__(obj)
+            if type(obj) == LSym:
+                new.__q = obj._LSym__sNum._Num__q * self.__q
+            elif type(obj) == Const:
+                new.__q = obj._Const__q * self.__q
+            else:
+                new.__q = self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __truediv__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -360,6 +447,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__truediv__(obj.__sepSym)
+            new.__q = self.__q / obj.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__truediv__(obj) for ni in self.__lsyms]
@@ -367,9 +455,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__truediv__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__truediv__(obj)
+            if type(obj) == LSym:
+                new.__q = self.__q / obj._LSym__sNum._Num__q 
+            elif type(obj) == Const:
+                new.__q = self.__q / obj._Const__q
+            else:
+                new.__q = self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __rtruediv__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -389,6 +486,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rtruediv__(obj.__sepSym)
+            new.__q = obj.__q / self.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__rtruediv__(obj) for ni in self.__lsyms]
@@ -396,9 +494,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__rtruediv__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rtruediv__(obj)
+            if type(obj) == LSym:
+                new.__q = obj._LSym__sNum._Num__q / self.__q
+            elif type(obj) == Const:
+                new.__q = obj._Const__q / self.__q
+            else:
+                new.__q = 1 / self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __floordiv__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -418,6 +525,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__floordiv__(obj.__sepSym)
+            new.__q = self.__q / obj.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__floordiv__(obj) for ni in self.__lsyms]
@@ -425,9 +533,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__floordiv__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__floordiv__(obj)
+            if type(obj) == LSym:
+                new.__q = self.__q / obj._LSym__sNum._Num__q 
+            elif type(obj) == Const:
+                new.__q = self.__q / obj._Const__q
+            else:
+                new.__q = self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __rfloordiv__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(obj) == LSymItem:
             if len(self) != len(obj):
@@ -447,6 +564,7 @@ class LSymItem():
                     raise itemNotSameKeysException('进行符号组运算的两个符号组下标必须一致')
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rfloordiv__(obj.__sepSym)
+            new.__q = obj.__q / self.__q
         else:
             if type(self.__lsyms) == list:
                 new.__lsyms = [ni.__rfloordiv__(obj) for ni in self.__lsyms]
@@ -454,9 +572,18 @@ class LSymItem():
                 new.__lsyms = {ki: self.__lsyms[ki].__rfloordiv__(obj) for ki in self.__lsyms.keys()}
             if LSymItem.sepSymCalc:
                 new.__sepSym = self.__sepSym.__rfloordiv__(obj)
+            if type(obj) == LSym:
+                new.__q = obj._LSym__sNum._Num__q / self.__q
+            elif type(obj) == Const:
+                new.__q = obj._Const__q / self.__q
+            else:
+                new.__q = 1 / self.__q
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __pow__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(self.__lsyms) == list:
             new.__lsyms = [ni.__pow__(obj) for ni in self.__lsyms]
@@ -464,9 +591,18 @@ class LSymItem():
             new.__lsyms = {ki: self.__lsyms[ki].__pow__(obj) for ki in self.__lsyms.keys()}
         if LSymItem.sepSymCalc:
             new.__sepSym = self.__sepSym.__pow__(obj)
+        if type(obj) == int or type(obj) == float:
+            new.__q = self.__q * obj
+        elif type(obj) == LSym:
+            new.__q = self.__q * obj._LSym__sNum._Num__value
+        elif type(obj) == Const:
+            new.__q = self.__q * obj._Const__value
+        new.__qUpdate()
+        openUnit()
         return new
     
     def __rpow__(self, obj):
+        closeUnit()
         new = LSymItem(None, None)
         if type(self.__lsyms) == list:
             new.__lsyms = [ni.__rpow__(obj) for ni in self.__lsyms]
@@ -474,4 +610,6 @@ class LSymItem():
             new.__lsyms = {ki: self.__lsyms[ki].__rpow__(obj) for ki in self.__lsyms.keys()}
         if LSymItem.sepSymCalc:
             new.__sepSym = self.__sepSym.__rpow__(obj)
+        new.__qUpdate()
+        openUnit()
         return new

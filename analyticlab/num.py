@@ -5,37 +5,45 @@ Created on Sun Jan 21 21:34:44 2018
 @author: xingrongtech
 """
 
-from math import log10, fabs, floor
+from math import log10, floor
+from quantities.quantity import Quantity
 from .const import Const
-from .system.numberformat import f, getDigitFront, getDigitBehind, getBound
+from .system.unit_open import unitIsOpen
+from .system.format_units import format_units_unicode, format_units_latex
+from .system.text_unicode import usub
+from .system.numberformat import f, fstr, getDigitFront, getDigitBehind, getBound
 from .system.exceptions import expressionInvalidException
 
 class Num():
     '''Num类为分析数值运算类，该类能够按照有效数字的保留和运算法则，进行数值的运算，即运算过程中会自动保留有效数字，最终运算结果按照有效数字位数输出。'''
-    __num = 0.0
+    
+    __value = 0.0
+    __q = 1
     __d_front = __d_behind = __d_valid = 0
-    __sci_bound = 3
+    __sci_bound = 5
     __isRelative = False
     __lastIsPM = False
     
-    def __init__(self, numStr, isRelative=False):
+    def __init__(self, numStr, unit=None, isRelative=False):
         '''初始化一个Num数值
         【参数说明】
         1.numStr（str）：要生成数值的字符串表达式，可以是一般计数法或科学记数法。注意要以字符串的形式给出，而不是直接给出int和float。
-        2.isRelative（可选，bool）：是否为相对比（百分数形式）。默认isRelative=False。
+        2.unit（可选，bool）：单位。默认unit=None，即没有单位。
+        3.isRelative（可选，bool）：是否为相对比（百分数形式）。默认inRelative=False。
         【应用举例】
         >>> t = Num('1.62')
+        >>> t = Num('1.62', 's')
         >>> x = Num('1.32e-8')
         >>> x = Num('1.32e-8', isRelative=True)
         【错误案例】
         >>> t = Num(float('1.62'))  #不能以float或int形式给出数值
-        >>> t = Num('1.62s')  #不能给出单位'''
+        >>> t = Num('1.62s')  #单位的给出方式不对'''
         if numStr == None:
             return
         if type(numStr) != str:
             raise expressionInvalidException('用于创建数值的参数无效，数值只能以字符串形式给出')
         sci_exp = 0  #默认不使用科学记数法
-        self.__num = float(numStr)
+        self.__value = float(numStr)
         for E in ['e', 'E']:
             if numStr.__contains__(E):
                 strArr = numStr.split(E)
@@ -65,74 +73,15 @@ class Num():
             if self.__d_behind < 0:
                 self.__d_behind = 0
         self.__isRelative = isRelative
+        if unit != None:  #给出单位时，添加单位
+            self.__q = Quantity(1., unit) if type(unit) == str else unit
         
     def __newInstance(self):
         return Num(None)
-        
-    def __str__(self):
-        '''获得数值的文本格式
-        【返回值】
-        str：数值文本。
-        【应用举例】
-        >>> x1 = Num('13.7')
-        >>> x2 = Num('1.32e-8')
-        >>> str(x1)
-        '13.7'
-        >>> str(x2)
-        '1.32e-08'
-        '''
-        if self.__isRelative:
-            return self.__getRelative() + r'%'
-        outStr = None
-        if self.__num == 0:
-            outStr = ('%.' + str(self.__d_behind) + 'f') % self.__num
-        elif (not self.__isRelative) and getBound(self) >= self.__sci_bound:  #判断是否需要使用科学记数法
-            if fabs(self.__num) < 1e-8 and getBound(self) > self.__d_behind:  #若数字本身很小，且数字的首位比小数点后位数还大，说明该数字是0
-                outStr = ('%.' + str(self.__d_behind) + 'f') % 0.00
-            else:
-                outStr, useSci = self.__sci()
-        else:
-            outStr = ('%.' + str(self.__d_behind) + 'f') % self.__num
-        return outStr
     
-    def latex(self, useBrackets=0):
-        '''获得数值的LaTeX格式
-        【参数说明】
-        useBrackets（可选，int）：在输出数值的LaTeX形式时，何时加括号，只能选择0、1、2、3中的一个。useBrackets为0时，表示任何情况下都不加括号；为1时，表示输出数值为负数或科学记数法时加括号；为2时，表示仅在输出数值为负数的时候加括号；为3时，表示仅在输出数值为科学记数法时加括号。默认useBrackets=0。
-        【返回值】
-        str：数值的LaTeX格式文本。
-        【应用举例】
-        >>> x1 = Num('1.32e-8')
-        >>> x2 = Num('-1.32e8')
-        >>> x1.latex()
-        1.32\times 10^{-8}
-        >>> x1.latex(1)
-        \left(1.32\times 10^{-8}\right)
-        >>> x2.latex(2)
-        \left(-1.32\times 10^{8}\right)
-        >>> x2.latex(3)
-        \left(-1.32\times 10^{8}\right)'''
-        if self.__isRelative:
-            return self.__getRelative() + r'\%'
-        outStr = None
-        useSci = False
-        if self.__num == 0:
-            outStr = ('%.' + str(self.__d_behind) + 'f') % self.__num
-        elif (not self.__isRelative) and getBound(self) >= self.__sci_bound:  #判断是否需要使用科学记数法
-            if fabs(self.__num) < 1e-8 and getBound(self) > self.__d_behind:  #若数字本身很小，且数字的首位比小数点后位数还大，说明该数字是0
-                outStr = ('%.' + str(self.__d_behind) + 'f') % 0.00
-                useBrackets = 0
-            else:
-                outStr, useSci = self.__sci(useLatex=True)
-        else:
-            outStr = ('%.' + str(self.__d_behind) + 'f') % self.__num
-        if (useBrackets == 1) and (self < 0 or useSci):
-            outStr = r'\left(%s\right)' % outStr
-        elif (useBrackets == 2) and (self < 0):
-            outStr = r'\left(%s\right)' % outStr
-        elif (useBrackets == 3) and useSci:
-            outStr = r'\left(%s\right)' % outStr
-        return outStr
+    def __overBound(self):
+        bound_limit = self.__sci_bound if abs(self.__value) < 1 else min(self.__sci_bound, self.__d_valid)
+        return getBound(self) >= bound_limit
     
     def __getRelative(self, dec=False):
         '''生成相对比值
@@ -142,26 +91,26 @@ class Num():
         ①dec为True时，返回值为float类型的相对比值；
         ②dec为False时，返回值为Num类型的相对比值。
         '''
-        rate = self.__num * 100
+        rate = self.__value * 100
         if dec:
             if abs(rate) < 0.00295:
-                return f(self.__num, 6)
+                return f(self.__value, 6)
             elif abs(rate) < 0.01:
-                return f(self.__num, 5)
+                return f(self.__value, 5)
             elif abs(rate) < 0.0295:
-                return f(self.__num, 5)
+                return f(self.__value, 5)
             elif abs(rate) < 0.1:
-                return f(self.__num, 4)
+                return f(self.__value, 4)
             elif abs(rate) < 0.295:
-                return f(self.__num, 4)
+                return f(self.__value, 4)
             elif abs(rate) < 1:
-                return f(self.__num, 3)
+                return f(self.__value, 3)
             elif abs(rate) < 2.95:
-                return f(self.__num, 3)
+                return f(self.__value, 3)
             elif abs(rate) < 10:
-                return f(self.__num, 2)
+                return f(self.__value, 2)
             else:
-                return f(self.__num, 2)
+                return f(self.__value, 2)
         else:
             if abs(rate) < 0.00295:
                 return '%.4f' % f(rate, 4)
@@ -182,6 +131,50 @@ class Num():
             else:
                 return '%d' % f(rate, 0)
         
+    def strNoUnit(self):
+        '''获得不含单位的数值的文本格式
+        【返回值】
+        str：不含单位的数值文本。'''
+        if self.__isRelative:
+            return self.__getRelative() + r'%'
+        outStr = None
+        if self.__value == 0:
+            outStr = fstr(0, self.__d_behind)
+        elif (not self.__isRelative) and self.__overBound():  #判断是否需要使用科学记数法
+            if abs(self.__value) < 1e-12 and getBound(self) > self.__d_behind:  #若数字本身很小，且数字的首位比小数点后位数还大，说明该数字是0
+                outStr = fstr(0, self.__d_behind)
+            else:
+                outStr, useSci = self.__sci()
+        else:
+            outStr = fstr(self.__value, self.__d_behind)
+        return outStr
+        
+    def __str__(self):
+        '''获得数值的文本格式
+        【返回值】
+        str：数值文本。
+        【应用举例】
+        >>> x1 = Num('13.7', 'mm')
+        >>> x2 = Num('1.32e-8')
+        >>> str(x1)
+        '13.7mm'
+        >>> str(x2)
+        '1.32e-08'
+        '''
+        if self.__isRelative:
+            return self.__getRelative() + r'%'
+        outStr = None
+        if self.__value == 0:
+            outStr = fstr(0, self.__d_behind)
+        elif (not self.__isRelative) and self.__overBound():  #判断是否需要使用科学记数法
+            if abs(self.__value) < 1e-12 and getBound(self) > self.__d_behind:  #若数字本身很小，且数字的首位比小数点后位数还大，说明该数字是0
+                outStr = fstr(0, self.__d_behind)
+            else:
+                outStr, useSci = self.__sci()
+        else:
+            outStr = fstr(self.__value, self.__d_behind)
+        return outStr + format_units_unicode(self.__q)
+        
     def __repr__(self):
         '''获得数值的文本格式
         【返回值】
@@ -196,31 +189,82 @@ class Num():
         '''
         return self.__str__()
     
+    def dlatex(self, useBrackets=0):
+        '''获得只包含数字，不包含单位的数值的LaTeX格式
+        【参数说明】
+        useBrackets（可选，int）：在输出数值的LaTeX形式时，何时加括号，只能选择0、1、2、3中的一个。useBrackets为0时，表示任何情况下都不加括号；为1时，表示输出数值为负数或科学记数法时加括号；为2时，表示仅在输出数值为负数的时候加括号；为3时，表示仅在输出数值为科学记数法时加括号。默认useBrackets=0。
+        【返回值】
+        str：无单位数值的LaTeX格式文本。'''
+        if self.__isRelative:
+            return self.__getRelative() + r'\%'
+        outStr = None
+        useSci = False
+        if self.__value == 0:
+            outStr = fstr(0, self.__d_behind)
+        elif (not self.__isRelative) and self.__overBound():  #判断是否需要使用科学记数法
+            if abs(self.__value) < 1e-12 and getBound(self) > self.__d_behind:  #若数字本身很小，且数字的首位比小数点后位数还大，说明该数字是0
+                outStr = fstr(0, self.__d_behind)
+                useBrackets = 0
+            else:
+                outStr, useSci = self.__sci(useLatex=True)
+        else:
+            outStr = fstr(self.__value, self.__d_behind)
+        if (useBrackets == 1) and (self < 0 or useSci):
+            outStr = r'\left(%s\right)' % outStr
+        elif (useBrackets == 2) and (self < 0):
+            outStr = r'\left(%s\right)' % outStr
+        elif (useBrackets == 3) and useSci:
+            outStr = r'\left(%s\right)' % outStr
+        return outStr
+    
+    def latex(self, useBrackets=0):
+        '''获得数值的LaTeX格式
+        【参数说明】
+        useBrackets（可选，int）：在输出数值的LaTeX形式时，何时加括号，只能选择0、1、2、3中的一个。useBrackets为0时，表示任何情况下都不加括号；为1时，表示输出数值为负数或科学记数法时加括号；为2时，表示仅在输出数值为负数的时候加括号；为3时，表示仅在输出数值为科学记数法时加括号。默认useBrackets=0。
+        【返回值】
+        str：数值的LaTeX格式文本。
+        【应用举例】
+        >>> x1 = Num('1.32e-8')
+        >>> x2 = Num('-1.32e8')
+        >>> x1.latex()
+        1.32\times 10^{-8}
+        >>> x1.latex(1)
+        \left(1.32\times 10^{-8}\right)
+        >>> x2.latex(2)
+        \left(-1.32\times 10^{8}\right)
+        >>> x2.latex(3)
+        \left(-1.32\times 10^{8}\right)'''
+        if self.__isRelative:
+            return self.dlatex(useBrackets)
+        else:
+            return self.dlatex(useBrackets) + format_units_latex(self.__q)
+    
     def toFloat(self):
         '''将当前数值转换成float
         【返回值】
         float：数值的float形式。
         '''
-        return float(self.__num)
+        return float(self.__value)
     
     def toInt(self):
         '''将当前数值转换成int
         【返回值】
         int：数值的int形式。'''
-        return int(self.__num)
+        return int(self.__value)
     
     def fix(self):
         '''数字修约
         【返回值】
         Num：修约后的Num数值。'''
         if self.__d_behind > 0:
-            fixedNumber = f(self.__num, self.__d_behind)
+            fixedNumber = f(self.__value, self.__d_behind)
         else:
-            fixedNumber = f(self.__num, self.__d_valid - self.__d_front)
+            fixedNumber = f(self.__value, self.__d_valid - self.__d_front)
         fixed = Num(None)
-        fixed.__num = fixedNumber
+        fixed.__value = fixedNumber
         fixed.__setDigit(self.__d_front, self.__d_behind, self.__d_valid)
         fixed.__isRelative = self.__isRelative
+        fixed.__q = self.__q
         return fixed
     
     def remainOneMoreDigit(self):
@@ -255,21 +299,20 @@ class Num():
         if self.__d_valid - self.__d_front > 0:  #对于去除多保留的一位之前，小数点后有有效数字的数值，小数点后位数少一位
             self.__d_behind -= 1   #（如35.63→35.6，137.0→137）
     
-    
     def __sciDigit(self):
         '''获得数值的科学记数法的指数'''
-        if self.__num == 0:
+        if self.__value == 0:
             return 0
-        elif getBound(self) >= self.__sci_bound:
+        elif self.__overBound():  #判断是否需要使用科学记数法
             if self.__d_front > 0:  #对于首个有效位在小数点前的数值
                 theory_digit = max(self.__d_valid, self.__d_front) - self.__d_behind  #理论小数点前位数
-                if fabs(theory_digit - 1) >= self.__sci_bound:  #通过理论有效数字位数再次检验是否需要使用科学记数法
+                if abs(theory_digit - 1) >= min(self.__sci_bound, self.__d_valid):  #通过理论有效数字位数再次检验是否需要使用科学记数法
                     return (theory_digit - 1)
                 else:  #若转换后的数字数量级过小，不使用科学记数法
                     return 0
             else:  #对于首个有效位在小数点后的数值
                 theory_digit = self.__d_behind - self.__d_valid  #理论小数点后位数
-                if fabs(theory_digit + 1) >= self.__sci_bound:
+                if abs(theory_digit + 1) >= min(self.__sci_bound, self.__d_valid):  #通过理论有效数字位数再次检验是否需要使用科学记数法
                     return -(theory_digit + 1)
                 else:
                     return 0
@@ -278,31 +321,33 @@ class Num():
     
     def __sci(self, useLatex=False):
         '''生成当前数值的科学记数法格式的字符串'''
+        self.__resetDigit()  #首先重设有效数字位数，以避免加减法运算后有效数字未重设导致的有效数字位数错误
         if self.__d_front > 0:  #对于首个有效位在小数点前的数值
             theory_digit = max(self.__d_valid, self.__d_front) - self.__d_behind  #理论小数点前位数
-            converted = self.__num / 10**(theory_digit - 1)
-            if fabs(theory_digit - 1) >= self.__sci_bound:  #通过理论有效数字位数再次检验是否需要使用科学记数法
+            converted = self.__value / 10**(theory_digit - 1)
+            if abs(theory_digit - 1) >= min(self.__sci_bound, self.__d_valid):  #通过理论有效数字位数再次检验是否需要使用科学记数法
                 if useLatex:
-                    return (('%.' + str(self.__d_valid - 1) + 'f') % converted + r'\times 10^{%d}') % (theory_digit - 1), True
+                    return r'%s\times 10^{%d}' % (fstr(converted, self.__d_valid - 1), theory_digit - 1), True
                 else:
-                    return (('%.' + str(self.__d_valid - 1) + 'f') % converted + 'e+%02d') % (theory_digit - 1), True
+                    return '%s×10%s' % (fstr(converted, self.__d_valid - 1), usub(theory_digit - 1)), True
             else:  #若转换后的数字数量级过小，不使用科学记数法
-                return ('%.' + str(self.__d_behind) + 'f') % self.__num, False
+                return fstr(self.__value, self.__d_behind), False
         else:  #对于首个有效位在小数点后的数值
             theory_digit = self.__d_behind - self.__d_valid  #理论小数点后位数
-            converted = self.__num * 10**(theory_digit + 1)
-            if fabs(theory_digit + 1) >= self.__sci_bound:
+            converted = self.__value * 10**(theory_digit + 1)
+            if abs(theory_digit + 1) >= min(self.__sci_bound, self.__d_valid):
                 if useLatex:
-                    return ('%.' + str(self.__d_valid - 1) + r'f\times 10^{-%d}') % (converted, theory_digit + 1), True
+                    return r'%s\times 10^{-%d}' % (fstr(converted, self.__d_valid - 1), theory_digit + 1), True
                 else:
-                    return ('%.' + str(self.__d_valid - 1) + r'fe-%02d') % (converted, theory_digit + 1), True
+                    return '%s×10%s' % (fstr(converted, self.__d_valid - 1), usub(-(theory_digit + 1))), True
             else:
-                return ('%.' + str(self.__d_behind) + 'f') % self.__num, False
+                return fstr(self.__value, self.__d_behind), False
     
     def __neg__(self):
         n = Num(None)
-        n.__num = -self.__num
+        n.__value = -self.__value
         n.__setDigit(self.__d_front, self.__d_behind, self.__d_valid)
+        n.__q = self.__q
         return n
     
     def setSciBound(self, bound):
@@ -328,56 +373,65 @@ class Num():
     def setIsRelative(self, isRelative):
         '''设定是否为相对比（百分数形式）
         【参数说明】
-        isRelative：是否为相对比。
-        '''
+        isRelative（bool）：是否为相对比。'''
         self.__isRelative = isRelative
+        
+    def resetUnit(self, unit=None):
+        '''重设Num数值的单位
+        【参数说明】
+        unit（可选，str）：重设后的单位。默认unit=None，即没有单位。'''
+        if unit == None:
+            self.__q = 1
+        else:
+            self.__q = Quantity(1., unit) if type(unit) == str else unit
         
     def __abs__(self):
         n = Num(None)
-        n.__num = fabs(self.__num)
+        n.__value = abs(self.__value)
         n.__setDigit(self.__d_front, self.__d_behind, self.__d_valid)
         n.__lastIsPM = self.__lastIsPM
+        n.__q = self.__q
         return n
         
     def __gt__(self, obj):
         if type(obj) == int or type(obj) == float:
-            return self.__num > obj
+            return self.__value > obj
         else:
-            return self.__num > obj.__num
+            return self.__value > obj.__value
     
     def __lt__(self, obj):
         if type(obj) == int or type(obj) == float:
-            return self.__num < obj
+            return self.__value < obj
         else:
-            return self.__num < obj.__num
+            return self.__value < obj.__value
     
     def __ge__(self, obj):
         if type(obj) == int or type(obj) == float:
-            return self.__num >= obj
+            return self.__value >= obj
         else:
-            return self.__num >= obj.__num
+            return self.__value >= obj.__value
     
     def __le__(self, obj):
         if type(obj) == int or type(obj) == float:
-            return self.__num <= obj
+            return self.__value <= obj
         else:
-            return self.__num <= obj.__num
+            return self.__value <= obj.__value
         
     def __add__(self, obj):
         n = Num(None)
         n.__lastIsPM = True
         if type(obj) == int or type(obj) == float:  #数值与常数相加，不影响有效数字位数
-            n.__num = self.__num + obj
+            n.__value = self.__value + obj
             n.__setDigit(self.__d_front, self.__d_behind, self.__d_valid)
         elif type(obj) == Const:
-            n.__num = self.__num + obj.value()
+            n.__value = self.__value + obj.value()
             n.__setDigit(self.__d_front, self.__d_behind, self.__d_valid)
         elif type(obj) == Num:  #数值相加，要考虑有效数字位数
-            if obj.__num == 0:  #若与当前数值obj相加的数值为0，则相加结果为原数值self
+            if obj.__value == 0:  #若与当前数值obj相加的数值为0，则相加结果为原数值self
                 return self
-            elif self.__num == 0:  #若与当前数值obj相加的数值不为0，而数值自身为0，则相加结果为当前数值obj
+            elif self.__value == 0:  #若与当前数值obj相加的数值不为0，而数值自身为0，则相加结果为当前数值obj
                 return obj
-            n.__num = self.__num + obj.__num
+            n.__value = self.__value + obj.__value
             if max(self.__d_front, obj.__d_front) > 0:  #对于首位在小数点前的数值
                 n.__d_front = max(self.__d_front, obj.__d_front)  #取小数点前位数较大者作为小数点前位数
                 n.__d_behind = min(self.__d_behind, obj.__d_behind)  #取小数点后位数较小者作为小数点后位数
@@ -396,6 +450,7 @@ class Num():
                 n.__d_front = 0
         else:
             return obj.__radd__(self)
+        n.__q = self.__q
         return n
     
     def __radd__(self, obj):
@@ -418,14 +473,14 @@ class Num():
         else:
             return obj.__sub__(self)
         sub = self.__add__(new)
-        sub.__num = -sub.__num
+        sub.__value = -sub.__value
         return sub
     
     def __resetDigit(self):
         '''重设有效数字位数（适用于非加减、取负之外的全部运算，即只需要有效数字位数，不需要小数点前、后位数的情形）'''
         if not self.__lastIsPM:  #只有上一位是加减、取负运算，才能重新获取有效数字位数
             return
-        usign = fabs(self.__num)
+        usign = abs(self.__value)
         if usign == 0:
             self.__d_valid = 1
             return
@@ -441,21 +496,43 @@ class Num():
     def __mul__(self, obj):
         n = Num(None)
         self.__resetDigit()
-        if type(obj) == int or type(obj) == float:  #数值与常数相乘，不影响有效数字位数
-            n.__num = self.__num * obj
-            n.__d_valid = self.__d_valid
-        elif type(obj) == Const:
-            n.__num = self.__num * obj.value()
-            n.__d_valid = self.__d_valid
-            if obj._Const__isHPercent:  #当被乘常数为100%时，将当前数值设定为相对比值
-                n.__isRelative = True
-        elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
-            obj.__resetDigit()
-            n.__num = self.__num * obj.__num
-            n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+        if unitIsOpen():
+            q = self.__q
+            if type(obj) == int or type(obj) == float:  #数值与常数相乘，不影响有效数字位数
+                n.__value = self.__value * obj
+                n.__d_valid = self.__d_valid
+            elif type(obj) == Const:
+                n.__value = self.__value * obj.value()
+                n.__d_valid = self.__d_valid
+                if obj._Const__special == 'hPercent':  #当被乘常数为100%时，将当前数值设定为相对比值
+                    n.__isRelative = True
+                    q = 1
+                else:
+                    q = q * obj._Const__q
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = self.__value * obj.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+                q = q * obj.__q
+            else:
+                return obj.__rmul__(self)
+            n.__q = q
         else:
-            return obj.__rmul__(self)
-        usign = fabs(n.__num)
+            if type(obj) == int or type(obj) == float:  #数值与常数相乘，不影响有效数字位数
+                n.__value = self.__value * obj
+                n.__d_valid = self.__d_valid
+            elif type(obj) == Const:
+                n.__value = self.__value * obj.value()
+                n.__d_valid = self.__d_valid
+                if obj._Const__special == 'hPercent':  #当被乘常数为100%时，将当前数值设定为相对比值
+                    n.__isRelative = True
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = self.__value * obj.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+            else:
+                return obj.__rmul__(self)
+        usign = abs(n.__value)
         n.__d_front = getDigitFront(usign)
         n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
         return n
@@ -466,58 +543,113 @@ class Num():
     def __truediv__(self, obj):
         n = Num(None)
         self.__resetDigit()
-        if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
-            if type(obj) == Const:
-                n.__num = self.__num / obj.value()
+        if unitIsOpen():
+            q = self.__q
+            if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
+                if type(obj) == Const:
+                    n.__value = self.__value / obj.value()
+                    q = q / obj._Const__q
+                else:
+                    n.__value = self.__value / obj
+                n.__d_valid = self.__d_valid
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = self.__value / obj.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+                q  = q / obj.__q
             else:
-                n.__num = self.__num / obj
-            n.__d_valid = self.__d_valid
-            usign = fabs(n.__num)
-            n.__d_front = getDigitFront(usign)
-            n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
-        elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
-            obj.__resetDigit()
-            n.__num = self.__num / obj.__num
-            n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
-            usign = fabs(n.__num)
-            n.__d_front = getDigitFront(usign)
-            n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+                return obj.__rtruediv__(self)
+            n.__q = q
         else:
-            return obj.__rtruediv__(self)
+            if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
+                if type(obj) == Const:
+                    n.__value = self.__value / obj.value()
+                else:
+                    n.__value = self.__value / obj
+                n.__d_valid = self.__d_valid
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = self.__value / obj.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            else:
+                return obj.__rtruediv__(self)
         return n
     
     def __rtruediv__(self, obj):
         n = Num(None)
         self.__resetDigit()
-        if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
-            if type(obj) == Const:
-                n.__num = obj.value() / self.__num
+        if unitIsOpen():
+            if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
+                if type(obj) == Const:
+                    n.__value = obj.value() / self.__value
+                    n.__q = obj._Const__q / self.__q
+                else:
+                    n.__value = obj / self.__value
+                    n.__q = 1 / self.__q
+                n.__d_valid = self.__d_valid
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = obj.__value / self.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+                n.__q = obj.__q / self.__q
             else:
-                n.__num = obj / self.__num
-            n.__d_valid = self.__d_valid
-            usign = fabs(n.__num)
-            n.__d_front = getDigitFront(usign)
-            n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
-        elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
-            obj.__resetDigit()
-            n.__num = obj.__num / self.__num
-            n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
-            usign = fabs(n.__num)
-            n.__d_front = getDigitFront(usign)
-            n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+                return obj.__truediv__(self)
         else:
-            return obj.__truediv__(self)
+            if type(obj) == int or type(obj) == float or type(obj) == Const:  #数值与常数相乘，不影响有效数字位数
+                if type(obj) == Const:
+                    n.__value = obj.value() / self.__value
+                else:
+                    n.__value = obj / self.__value
+                n.__d_valid = self.__d_valid
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            elif type(obj) == Num:  #数值相乘，要考虑有效数字位数
+                obj.__resetDigit()
+                n.__value = obj.__value / self.__value
+                n.__d_valid = min(self.__d_valid, obj.__d_valid)  #最小有效数字位数原则
+                usign = abs(n.__value)
+                n.__d_front = getDigitFront(usign)
+                n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
+            else:
+                return obj.__truediv__(self)
         return n
     
     def __pow__(self, b):
         n = Num(None)
         self.__resetDigit()
-        if type(b) == Const:
-            n.__num = self.__num ** b.value()
+        if unitIsOpen():
+            if type(b) == Const:
+                n.__value = self.__value ** b.value()
+                n.__q = self.__q ** b.value()
+            else:
+                n.__value = self.__value ** b
+                n.__q = self.__q ** b
         else:
-            n.__num = self.__num ** b
+            if type(b) == Const:
+                n.__value = self.__value ** b.value()
+            else:
+                n.__value = self.__value ** b
         n.__d_valid = self.__d_valid
-        usign = fabs(n.__num)
+        usign = abs(n.__value)
         n.__d_front = getDigitFront(usign)
         n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
         return n
@@ -525,15 +657,23 @@ class Num():
     def __rpow__(self, a):
         n = Num(None)
         self.__resetDigit()
-        if type(a) == Const:
-            n.__num = a.value() ** self.__num
+        if unitIsOpen():
+            if type(a) == Const:
+                n.__value = a.value() ** self.__value
+            else:
+                n.__value = a ** self.__value
         else:
-            n.__num = a ** self.__num
+            if type(a) == Const:
+                n.__value = a.value() ** self.__value
+                n.__q = a._Const__q * self.__value
+            else:
+                n.__value = a ** self.__value
+                n.__q = 1
         #指数（如pH）的小数点后位数（包括0）为所得数的有效数字位数
         n.__d_valid = self.__d_behind
         if n.__d_valid == 0:
             n.__d_valid = 1
-        usign = fabs(n.__num)
+        usign = abs(n.__value)
         n.__d_front = getDigitFront(usign)
         n.__d_behind = getDigitBehind(usign, n.__d_valid, n.__d_front)
         return n
