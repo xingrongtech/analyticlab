@@ -1049,16 +1049,16 @@ class LSym():
             o_symText = a._Const__symText
             o_calBrac = a._Const__calBrac
             o_calText = a._Const__calText
-            if 3 >= a.__symPrior:
+            if 3 >= a._Const__symPrior:
                 o_symBrac += 1
                 o_symText = self.__bracket(o_symBrac) % o_symText
-            if 3 >= a.__calPrior:
+            if 3 >= a._Const__calPrior:
                 o_calBrac += 1
                 o_calText = self.__bracket(o_calBrac) % o_calText
         ### 合成表达式 ###
         symText = sNum = calText = symBrac = calBrac = None
         if type(a) == Const:
-            o_s_decL = a.__s_decL
+            o_s_decL = a._Const__s_decL
             s_dec = self.__s_decL and self.__s_decR and a._Const__s_decL and a._Const__s_decR
         elif type(a) == int or type(a) == float:
             o_s_decL = True
