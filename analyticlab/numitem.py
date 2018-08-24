@@ -13,7 +13,7 @@ from .const import Const
 from .latexoutput import LaTeX
 from .lookup import t, t_repl
 from .system.unit_open import openUnit, closeUnit
-from .system.format_units import format_units_unicode, format_units_latex, deg
+from .system.format_units import format_units_unicode, deg
 from .system.statformat import statFormat, getMaxDeltaDigit
 from .system.exceptions import expressionInvalidException, muNotFoundException, itemNotSameLengthException
 
@@ -29,7 +29,7 @@ class NumItem():
     __gd_valid = 0
     __isRelative = False
     
-    def __init__(self, nums, unit=None, mu=None, isRelative=False, sym=None, muSym=r'\mu'):
+    def __init__(self, nums, unit=None, mu=None, sym=None, muSym=r'\mu'):
         '''初始化一个NumItem数组
         【参数说明】
         1.nums：要初始化的数值，可以是str或list：
@@ -39,9 +39,8 @@ class NumItem():
         (4)LSymItem：从由LSymItem符号组中获取Num数值，生成NumItem。
         2.unit（可选，str）：单位。当unit为None时，会选择list<Num>或list<LSym>中第1个元素的unit，或者LSymItem的unit作为NumItem的unit，否则没有单位。默认unit=None。
         3.mu（可选，str）：真值μ，用于误差分析。默认不给出，但进行误差分析时，必须给出μ。默认mu=None。
-        4.isRelative（可选，bool）：是否为相对比（百分数形式），默认isRelative=False。
-        5.sym（可选，str）：符号，一般情况下不需要给出，当需要展示计算过程时，最好给出。默认sym=None。
-        6.muSym（可选，str）：真值μ对应的符号，默认muSym=r'\mu'。
+        4.sym（可选，str）：符号，一般情况下不需要给出，当需要展示计算过程时，最好给出。默认sym=None。
+        5.muSym（可选，str）：真值μ对应的符号，默认muSym=r'\mu'。
         【应用举例】
         >>> t = NumItem('1.62 1.66 1.58 1.71 1.69')
         >>>
@@ -49,8 +48,8 @@ class NumItem():
         >>> p = NumItem([p1, p2, p3])
         >>>
         >>> t = NumItem('1.62 1.66  58 1.71 1.69', mu='1.65')
-        >>> w = NumItem('38.42 38.56 38.47 38.41 38.55', isRelative=True)
-        >>> t = NumItem('1.62 1.66 1.58 1.71 1.69', sym='t', unit='s')
+        >>> w = NumItem('38.42 38.56 38.47 38.41 38.55')
+        >>> t = NumItem('1.62 1.66 1.58 1.71 1.69', 's', sym='t')
         【错误案例】
         >>> t = NumItem(1.62,1.66,1.58,1.71,1.69)  #不能直接用float或int初始化数组
         >>> t = NumItem([1.62,1.66,1.58,1.71,1.69])  #使用list初始化数组时，数值必须是Num
@@ -98,7 +97,6 @@ class NumItem():
                     ri._Num__q = self.__q
         else:
             raise expressionInvalidException('用于创建数组的参数无效')
-        self.setIsRelative(isRelative)                
         if mu != None:
             if type(mu) == str:
                 self.__mu = Num(mu, self.__q)
