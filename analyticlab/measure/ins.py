@@ -6,6 +6,7 @@ Created on Tue Feb  6 19:20:06 2018
 """
 
 from quantities.quantity import Quantity
+from ..num import Num
 
 class Ins():
     '''Ins为测量仪器类，该类用于描述一个测量仪器的B类不确定度和仪器测量值的单位。'''
@@ -19,7 +20,7 @@ class Ins():
     def __init__(self, halfWidth, distribution=1, unit=None, **param):
         '''初始化一个测量仪器
         【参数说明】
-        1.halfWidth（str）：半宽度。由于半宽度会决定有效数字位数，因此要以字符串形式给出。
+        1.halfWidth（str或Num）：半宽度。可以选择以字符串或Num数值形式给出。
         2.distribution（可选，int）：分布类型，从以下列表中取值。默认distribution=Ins.rectangle。
         ①Ins.norm：正态分布；
         ②Ins.rectangle：矩形分布；
@@ -29,12 +30,20 @@ class Ins():
         ⑥Ins.trapezoid：梯形分布，此分布下需要通过附加参数beta给出β值。
         3.unit（可选，str）：测量结果的单位。默认unit=None。
         '''
-        self.halfWidth = halfWidth
         self.distribution = distribution
         if unit == None:
             self.q = 1
         else:
             self.q = Quantity(1., unit) if type(unit) == str else unit
+        if type(halfWidth) == str:
+            self.a = Num(halfWidth, self.q)
+        elif type(halfWidth) == Num:
+            self.a = halfWidth
+            if unit == None:
+                self.q = halfWidth._Num__q
+            else:
+                halfWidth._Num__q = self.q
+        self.halfWidth = halfWidth
         if len(param) > 0:
             self.beta = param['beta']
             
