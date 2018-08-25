@@ -22,7 +22,7 @@ def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=T
     ①process为False时，返回值为Num类型的B类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。
     ③process为True且needValue为True时，返回值为Num类型的B类不确定度和LaTeX类型的计算过程组成的元组。'''
-    a = Num(instrument.halfWidth, instrument.q)
+    a = instrument.a
     a.setSciBound(9)
     if instrument.distribution <= 4:
         uB = a / kValue[instrument.distribution]
