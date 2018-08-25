@@ -370,7 +370,7 @@ class Measure():
         str：(测量值±不确定度)，如已给出单位，会附加单位'''
         return self.__str__()
     
-    def _repr_latex_(self):
+    def latex(self):
         val = self.value()
         u = self.unc()
         if Measure.process:
@@ -390,4 +390,7 @@ class Measure():
             while float(u.strNoUnit()) == 0:
                 u.remainOneMoreDigit()
             expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
-        return r'$\begin{align}' + expr + r'\end{align}$'
+        return expr
+    
+    def _repr_latex_(self):
+       return r'$\begin{align}%s\end{align}$' % self.latex()
