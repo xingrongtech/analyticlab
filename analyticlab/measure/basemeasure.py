@@ -27,6 +27,7 @@ class BaseMeasure(measure.Measure):
     __staUnc = None
     __q = 1
     __data = None
+    __linearfit_data = None
     
     def __init__(self, data, instrument=None, unit=None, sym=None, description=None):
         '''初始化一个BaseMeasure直接测量
@@ -395,7 +396,7 @@ class BaseMeasure(measure.Measure):
         str：(测量值±不确定度)，如已给出单位，会附加单位'''
         return self.__str__()
     
-    def _repr_latex_(self):
+    def latex(self):
         val = self.value()
         u = self.unc()
         unitExpr = format_units_latex(self.__q)
@@ -412,4 +413,7 @@ class BaseMeasure(measure.Measure):
             while float(u.strNoUnit()) == 0:
                 u.remainOneMoreDigit()
             expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
-        return r'$\begin{align}' + expr + r'\end{align}$'
+        return expr
+    
+    def _repr_latex_(self):
+        return r'$\begin{align}%s\end{align}$' % self.latex()
