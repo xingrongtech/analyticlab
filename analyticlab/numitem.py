@@ -26,6 +26,7 @@ class NumItem():
     __q = 1
     __index = 0
     __mu = None
+    __sym = None
     __gd_valid = 0
     __isRelative = False
     
@@ -763,12 +764,12 @@ class NumItem():
                 p_delta = self - mean
                 sciDigit = self.__sciDigit()
                 if sciDigit == 0:
-                    sumExpr = '+'.join([(r'%s^{2}' % di.dlatex(1)) for di in p_delta])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, result.latex()))
+                    sumExpr = '+'.join([(r'%s^2' % di.dlatex(1)) for di in p_delta])
+                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^2}=\sqrt{\frac{1}{%d}\left[%s\right]}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, result.latex()))
                 else:
                     d_delta = p_delta * 10**(-sciDigit)
-                    sumExpr = '+'.join([(r'%s^{2}' % di.dlatex(1)) for di in d_delta])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, sciDigit, result.latex()))
+                    sumExpr = '+'.join([(r'%s^2' % di.dlatex(1)) for di in d_delta])
+                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^2}=\sqrt{\frac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, sciDigit, result.latex()))
                 if needValue:
                     return result, latex
                 else:
