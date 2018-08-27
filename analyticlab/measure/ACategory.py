@@ -32,12 +32,12 @@ def Bessel(item, process=False, needValue=False, remainOneMoreDigit=False):
         if sciDigit == 0:
             p_mean = item.mean()
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in item._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d\times %d}\left[%s\right]}=%s' % (signal, signal, signal, len(item), len(item)-1, sumExpr, result.latex())) 
+            latex = LaTeX(r'u_{%s A}=\sqrt{\cfrac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\cfrac{1}{%d\times %d}\left[%s\right]}=%s' % (signal, signal, signal, len(item), len(item)-1, sumExpr, result.latex())) 
         else:
             d_arr = item * 10**(-sciDigit)
             p_mean = item.mean() * 10**(-sciDigit)
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in d_arr._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, len(item), len(item)-1, sumExpr, sciDigit, result.latex()))
+            latex = LaTeX(r'u_{%s A}=\sqrt{\cfrac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\cfrac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, len(item), len(item)-1, sumExpr, sciDigit, result.latex()))
         if needValue:
             return result, latex
         else:
@@ -60,7 +60,7 @@ def Range(item, process=False, needValue=False, remainOneMoreDigit=False):
         signal = item._NumItem__sym
         p_max, p_min = max(item._NumItem__arr), min(item._NumItem__arr)
         C = rC(len(item))
-        latex = LaTeX(r'u_{%s A}=\frac{R}{C\sqrt{n}}=\frac{%s-%s}{%s\times\sqrt{%s}}=%s' % (signal, p_max.dlatex(), p_min.dlatex(2), C, len(item), result.latex()))
+        latex = LaTeX(r'u_{%s A}=\cfrac{R}{C\sqrt{n}}=\cfrac{%s-%s}{%s\times\sqrt{%s}}=%s' % (signal, p_max.dlatex(), p_min.dlatex(2), C, len(item), result.latex()))
         if needValue:
             return result, latex
         else:
@@ -86,12 +86,12 @@ def CollegePhysics(item, process=False, needValue=False, remainOneMoreDigit=Fals
         if sciDigit == 0:
             p_mean = item.mean()
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in item._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d\times %d}\left[%s\right]}=%s' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, result.latex())) 
+            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\cfrac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\cfrac{1}{%d\times %d}\left[%s\right]}=%s' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, result.latex())) 
         else:
             d_arr = item * 10**(-sciDigit)
             p_mean = item.mean() * 10**(-sciDigit)
             sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in d_arr._NumItem__arr])
-            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\frac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\frac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, sciDigit, result.latex()))
+            latex = LaTeX(r'u_{%s A}=t_{n}\sqrt{\cfrac{1}{n(n-1)}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=%.2f \times\sqrt{\cfrac{1}{%d \times %d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, phy_t(len(item)), len(item), len(item)-1, sumExpr, sciDigit, result.latex()))
         if needValue:
             return result, latex
         else:
@@ -140,7 +140,7 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
                 signal = item._NumItem__sym
                 p_max, p_min = max(item._NumItem__arr), min(item._NumItem__arr)
                 C = rC(len(item))
-                latex.add(r's_{%s}=\frac{R}{C}=\frac{%s-%s}{%s}=%s' % (signal, p_max.dlatex(), p_min.dlatex(2), C, res.latex()))
+                latex.add(r's_{%s}=\cfrac{R}{C}=\cfrac{%s-%s}{%s}=%s' % (signal, p_max.dlatex(), p_min.dlatex(2), C, res.latex()))
         else:
             for item in items:
                 res = std.Bessel(item, remainOneMoreDigit=True)
@@ -150,12 +150,12 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
                 if sciDigit == 0:
                     p_mean = item.mean()
                     sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in item._NumItem__arr])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}=%s' % (signal, signal, signal, len(item)-1, sumExpr, res.latex())) 
+                    latex.add(r's_{%s}=\sqrt{\cfrac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\cfrac{1}{%d}\left[%s\right]}=%s' % (signal, signal, signal, len(item)-1, sumExpr, res.latex())) 
                 else:
                     d_arr = item * 10**(-sciDigit)
                     p_mean = item.mean() * 10**(-sciDigit)
                     sumExpr = '+'.join([(r'%s^{2}' % (xi - p_mean).dlatex(1)) for xi in d_arr._NumItem__arr])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, len(item)-1, sumExpr, sciDigit, res.latex()))
+                    latex.add(r's_{%s}=\sqrt{\cfrac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\cfrac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (signal, signal, signal, len(item)-1, sumExpr, sciDigit, res.latex()))
     #根据所有样本的样本数量是否一致，判断使用哪个公式
     nSame = True
     n = len(items[0])
@@ -201,13 +201,13 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
         if nSame:
             sumExpr = '+'.join([('%s^{2}' % res.dlatex(1)) for res in resItem._NumItem__arr])
             if sciDigit == 0:
-                latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m {s_{%s i}}^{2}}{m}}=\sqrt{\frac{%s}{%d}}=%s' % (sym, sumExpr, m, sp.latex()))
+                latex.add(r's_{p}=\sqrt{\cfrac{\sum\limits_{i=1}^m {s_{%s i}}^{2}}{m}}=\sqrt{\cfrac{%s}{%d}}=%s' % (sym, sumExpr, m, sp.latex()))
             else:
-                latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m {s_{%s i}}^{2}}{m}}=\sqrt{\frac{%s}{%d}}\times 10^{%d}=%s' % (sym, sumExpr, m, sciDigit, sp.latex()))
+                latex.add(r's_{p}=\sqrt{\cfrac{\sum\limits_{i=1}^m {s_{%s i}}^{2}}{m}}=\sqrt{\cfrac{%s}{%d}}\times 10^{%d}=%s' % (sym, sumExpr, m, sciDigit, sp.latex()))
             if method == 'CollegePhysics':
-                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{mn}}=\frac{%.2f \times %s}{\sqrt{%s}}=%s' % (sym, phy_t(vSum+1), sp.dlatex(2), nTotal, result.latex()))
+                latex.add(r'u_{%s A}=\cfrac{t_{v+1}s_p}{\sqrt{mn}}=\cfrac{%.2f \times %s}{\sqrt{%s}}=%s' % (sym, phy_t(vSum+1), sp.dlatex(2), nTotal, result.latex()))
             else:
-                latex.add(r'u_{%s A}=\frac{s_p}{\sqrt{mn}}=\frac{%s}{\sqrt{%s}}=%s' % (sym, sp.dlatex(), nTotal, result.latex()))
+                latex.add(r'u_{%s A}=\cfrac{s_p}{\sqrt{mn}}=\cfrac{%s}{\sqrt{%s}}=%s' % (sym, sp.dlatex(), nTotal, result.latex()))
         else:
             sumExpr = ''
             if method == 'Range':
@@ -220,13 +220,13 @@ def CombSamples(items, method='auto', process=False, needValue=False, sym=None, 
                 vSumExpr = '+'.join(['%s' % (len(item._NumItem__arr) - 1) for item in items]) 
             sumExpr = sumExpr[:-1]
             if sciDigit == 0:
-                latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m \left(v_{i}s_{%s i}^{2}\right)}{\sum\limits_{i=1}^m v_{i}}}=\sqrt{\frac{%s}{%s}}=%s' % (sym, sumExpr, vSumExpr, sp.latex()))
+                latex.add(r's_{p}=\sqrt{\cfrac{\sum\limits_{i=1}^m \left(v_{i}s_{%s i}^{2}\right)}{\sum\limits_{i=1}^m v_{i}}}=\sqrt{\cfrac{%s}{%s}}=%s' % (sym, sumExpr, vSumExpr, sp.latex()))
             else:
-                latex.add(r's_{p}=\sqrt{\frac{\sum\limits_{i=1}^m \left(v_{i}s_{%s i}^{2}\right)}{\sum\limits_{i=1}^m v_{i}}}=\sqrt{\frac{%s}{%s}}\times 10^{%d}=%s' % (sym, sumExpr, vSumExpr, sciDigit, sp.latex()))
+                latex.add(r's_{p}=\sqrt{\cfrac{\sum\limits_{i=1}^m \left(v_{i}s_{%s i}^{2}\right)}{\sum\limits_{i=1}^m v_{i}}}=\sqrt{\cfrac{%s}{%s}}\times 10^{%d}=%s' % (sym, sumExpr, vSumExpr, sciDigit, sp.latex()))
             if method == 'CollegePhysics':
-                latex.add(r'u_{%s A}=\frac{t_{v+1}s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\frac{%s \times %s}{\sqrt{%s}}=%s' % (sym, phy_t(vSum+1), sp.dlatex(2), nTotal, result.latex()))
+                latex.add(r'u_{%s A}=\cfrac{t_{v+1}s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\cfrac{%s \times %s}{\sqrt{%s}}=%s' % (sym, phy_t(vSum+1), sp.dlatex(2), nTotal, result.latex()))
             else:
-                latex.add(r'u_{%s A}=\frac{s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\frac{%s}{\sqrt{%s}}=%s' % (sym, sp.dlatex(), nTotal, result.latex()))
+                latex.add(r'u_{%s A}=\cfrac{s_p}{\sqrt{\sum\limits_{i=1}^m n_{i}}}=\cfrac{%s}{\sqrt{%s}}=%s' % (sym, sp.dlatex(), nTotal, result.latex()))
         if needValue:
             return result, latex
         else:

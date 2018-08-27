@@ -98,41 +98,61 @@ def latex_measure(resMea, resSym, resDescription):
             latex.add(r'(%d)\text{对于}%s\text{：}' % (i+1, measures[i]._BaseMeasure__description))
             latex.add(measures[i].unc(process=True, remainOneMoreDigit=True))
         latex.add(r'\text{计算合成不确定度：}')
-        if res['isRate']:
-            uncValue = res['unc']._Num__getRelative(dec=True) * eqNum
-            latex.add(r'\frac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
-            latex.add(r'u_{%s}=\frac{u_{%s}}{%s}\cdot %s=%s\times %s=%s' % (resSym, resSym, resSym, resSym, res['unc'].dlatex(), eqNum.dlatex(), uncValue.latex()))
+        if resMea.useRelUnc:
+            if res['isRate']:
+                urNum = res['unc'].latex()
+                latex.add(r'\cfrac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), urNum.dlatex()))
+            else:
+                urNum = res['unc'] / eqNum
+                urNum.setIsRelative(True)
+                #给出不确定度计算定义式
+                pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._BaseMeasure__sym, mi[0]._BaseMeasure__sym) for mi in res['baseMeasures'].values()])
+                pExpr = r'\sqrt{%s}' % pExpr
+                latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
+                latex.add(r'\cfrac{u_{%s}}{%s}=\cfrac{%s}{%s}\times 100\%%=%s' % (resSym, resSym, res['unc'].dlatex(), eqNum.dlatex(), urNum.dlatex()))
         else:
-            #给出不确定度计算定义式
-            pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._BaseMeasure__sym, mi[0]._BaseMeasure__sym) for mi in res['baseMeasures'].values()])
-            pExpr = r'\sqrt{%s}' % pExpr
-            latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
-        if res['isRate']:
-            uNum = uncValue
-        else:
-            uNum = res['unc']
+            if res['isRate']:
+                uNum = res['unc']._Num__getRelative(dec=True) * eqNum
+                latex.add(r'\cfrac{u_{%s}}{%s}=%s\\&\quad=%s\\&\quad=%s' % (resSym, resSym, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
+                latex.add(r'u_{%s}=\cfrac{u_{%s}}{%s}\cdot %s=%s\times %s=%s' % (resSym, resSym, resSym, resSym, res['unc'].dlatex(), eqNum.dlatex(), uNum.latex()))
+            else:
+                uNum = res['unc']
+                #给出不确定度计算定义式
+                pExpr = '+'.join([r'\left(\cfrac{\partial %s}{\partial %s}\right)^2 u_{%s}^2' % (resSym, mi[0]._BaseMeasure__sym, mi[0]._BaseMeasure__sym) for mi in res['baseMeasures'].values()])
+                pExpr = r'\sqrt{%s}' % pExpr
+                latex.add(r'u_{%s}=%s\\&\quad=%s\\&\quad=%s\\&\quad=%s' % (resSym, pExpr, res['uncLSym'].sym(), res['uncLSym'].cal(), res['unc'].latex()))
     elif str(type(resMea)) =="<class 'analyticlab.measure.basemeasure.BaseMeasure'>":
+        if resSym == None:
+            resSym = resMea._BaseMeasure__sym
         #针对BaseMeasure的测量值输出
         eqNum, proc_eq = resMea.value(process=True, needValue=True)
         #针对BaseMeasure的不确定度输出
         uNum, proc_u = resMea.unc(process=True, needValue=True, remainOneMoreDigit=True)
         latex.add(proc_eq)
         latex.add(proc_u)
-        if resSym == None:
-            resSym = resMea._BaseMeasure__sym
-    if res['K'] != None:
-        uNum = res['K'] * uNum
-        latex.add(r'u_{%s,%s}=%g u_{%s}=%s' % (resSym, res['P'][1], res['K'], resSym, uNum.latex()))
+        if resMea.useRelUnc:
+            urNum = uNum / eqNum
+            urNum.setIsRelative(True)
+            latex.add(r'\cfrac{u_{%s}}{%s}=\cfrac{%s}{%s}\times 100\%%=%s' % (resSym, resSym, uNum.dlatex(), eqNum.dlatex(), urNum.dlatex()))
     sciDigit = eqNum._Num__sciDigit()
     unitExpr = format_units_latex(eqNum._Num__q)
-    if sciDigit == 0:
-        uNum._Num__setDigit(eqNum._Num__d_front, eqNum._Num__d_behind, eqNum._Num__d_valid)
-        finalExpr = r'\text{%s} %s=\left(%s \pm %s\right)%s' % (resDescription, resSym, eqNum.strNoUnit(), uNum.strNoUnit(), unitExpr)
+    if resMea.useRelUnc:
+        if res['K'] != None:
+            urNum = res['K'] * urNum
+            latex.add(r'\cfrac{u_{%s,%s}}{%s}=%g \cfrac{u_{%s}}{%s}=%s' % (resSym, res['P'][1], resSym, res['K'], resSym, resSym, urNum.dlatex()))
+        finalExpr = r'\text{%s} %s=%s\left(1 \pm %s\right)%s' % (resDescription, resSym, eqNum.dlatex(), urNum.dlatex(), unitExpr)
     else:
-        eqNum *= 10**(-sciDigit)
-        uNum *= 10**(-sciDigit)
-        uNum._Num__setDigit(eqNum._Num__d_front, eqNum._Num__d_behind, eqNum._Num__d_valid)
-        finalExpr = r'\text{%s} %s=\left(%s \pm %s\right)\times 10^{%d}%s' % (resDescription, resSym, eqNum.strNoUnit(), uNum.strNoUnit(), sciDigit, unitExpr)
+        if res['K'] != None:
+            uNum = res['K'] * uNum
+            latex.add(r'u_{%s,%s}=%g u_{%s}=%s' % (resSym, res['P'][1], res['K'], resSym, uNum.latex()))
+        if sciDigit == 0:
+            uNum._Num__setDigit(eqNum._Num__d_front, eqNum._Num__d_behind, eqNum._Num__d_valid)
+            finalExpr = r'\text{%s} %s=\left(%s \pm %s\right)%s' % (resDescription, resSym, eqNum.dlatex(), uNum.dlatex(), unitExpr)
+        else:
+            eqNum *= 10**(-sciDigit)
+            uNum *= 10**(-sciDigit)
+            uNum._Num__setDigit(eqNum._Num__d_front, eqNum._Num__d_behind, eqNum._Num__d_valid)
+            finalExpr = r'\text{%s} %s=\left(%s \pm %s\right)\times 10^{%d}%s' % (resDescription, resSym, eqNum.dlatex(), uNum.dlatex(), sciDigit, unitExpr)
     if res['K'] == None:
         finalExpr += r'\qquad {\rm P=0.6826}'
     else:

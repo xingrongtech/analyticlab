@@ -24,17 +24,15 @@ class Num():
     __isRelative = False
     __lastIsPM = False
     
-    def __init__(self, numStr, unit=None, isRelative=False):
+    def __init__(self, numStr, unit=None):
         '''初始化一个Num数值
         【参数说明】
         1.numStr（str）：要生成数值的字符串表达式，可以是一般计数法或科学记数法。注意要以字符串的形式给出，而不是直接给出int和float。
-        2.unit（可选，bool）：单位。默认unit=None，即没有单位。
-        3.isRelative（可选，bool）：是否为相对比（百分数形式）。默认inRelative=False。
+        2.unit（可选，str）：单位。默认unit=None，即没有单位。
         【应用举例】
         >>> t = Num('1.62')
         >>> t = Num('1.62', 's')
         >>> x = Num('1.32e-8')
-        >>> x = Num('1.32e-8', isRelative=True)
         【错误案例】
         >>> t = Num(float('1.62'))  #不能以float或int形式给出数值
         >>> t = Num('1.62s')  #单位的给出方式不对'''
@@ -72,7 +70,6 @@ class Num():
             self.__d_behind -= sci_exp
             if self.__d_behind < 0:
                 self.__d_behind = 0
-        self.__isRelative = isRelative
         if unit != None:  #给出单位时，添加单位
             self.__q = Quantity(1., unit) if type(unit) == str else unit
         
@@ -501,6 +498,7 @@ class Num():
             if type(obj) == int or type(obj) == float:  #数值与常数相乘，不影响有效数字位数
                 n.__value = self.__value * obj
                 n.__d_valid = self.__d_valid
+                n.__isRelative = self.__isRelative
             elif type(obj) == Const:
                 n.__value = self.__value * obj.value()
                 n.__d_valid = self.__d_valid

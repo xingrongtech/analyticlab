@@ -27,9 +27,11 @@ class Measure():
     __isPureMulDiv = True
     __K = None
     __q_rep = None
+    useRelUnc = False
     
     def __newInstance(self, symbol, vl, baseMeasures, consts, lsyms, isPureMulDiv):
         new = Measure()
+        new.useRelUnc = False
         new.__symbol = symbol
         new.__vl = vl
         new.__baseMeasures = baseMeasures
@@ -310,8 +312,7 @@ class Measure():
     def unc(self):
         '''获得不确定度
         【返回值】
-        Num：K=1时，为标准不确定度数值；K>1时，为扩展不确定度数值。
-        '''
+        Num：K=1时，为标准不确定度数值；K>1时，为扩展不确定度数值。'''
         if Measure.process:
             unc = self.__getUnc()._LSym__sNum
         else:
@@ -319,6 +320,14 @@ class Measure():
         if self.__K != None:
             unc *= self.__K
         return unc
+    
+    def relUnc(self):
+        '''获得相对不确定度
+        【返回值】
+        Num：K=1时，为相对标准不确定度数值；K>1时，为相对扩展不确定度数值。'''
+        ur = self.unc() / self.value()
+        ur.setIsRelative = True
+        return ur
     
     def uncLSym(self):
         assert Measure.process, 'Measure.process为False时，无法获取LSym'
@@ -348,20 +357,25 @@ class Measure():
         else:
             unitExpr = format_units_unicode(self.__vl._Num__q)
         sciDigit = val._Num__sciDigit()
-        if sciDigit == 0:
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'%s±%s' % (val.strNoUnit(), u.strNoUnit())
-            if unitExpr != '':
-                expr = '(%s)%s' % (expr, unitExpr)
+        if self.useRelUnc:
+            ur = u / val
+            ur.setIsRelative(True)
+            expr = r'%s(1±%s)%s' % (val.strNoUnit(), ur, unitExpr)
         else:
-            val *= 10**(-sciDigit)
-            u *= 10**(-sciDigit)
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'(%s±%s)×10%s%s' % (val.strNoUnit(), u.strNoUnit(), usub(sciDigit), unitExpr)
+            if sciDigit == 0:
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'%s±%s' % (val.strNoUnit(), u.strNoUnit())
+                if unitExpr != '':
+                    expr = '(%s)%s' % (expr, unitExpr)
+            else:
+                val *= 10**(-sciDigit)
+                u *= 10**(-sciDigit)
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'(%s±%s)×10%s%s' % (val.strNoUnit(), u.strNoUnit(), usub(sciDigit), unitExpr)
         return expr
         
     def __repr__(self):
@@ -370,7 +384,7 @@ class Measure():
         str：(测量值±不确定度)，如已给出单位，会附加单位'''
         return self.__str__()
     
-    def _repr_latex_(self):
+    def latex(self):
         val = self.value()
         u = self.unc()
         if Measure.process:
@@ -378,16 +392,24 @@ class Measure():
         else:
             unitExpr = format_units_latex(self.__vl._Num__q)
         sciDigit = val._Num__sciDigit()
-        if sciDigit == 0:
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'\left(%s \pm %s\right)%s' % (val.strNoUnit(), u.strNoUnit(), unitExpr)
+        if self.useRelUnc:
+            ur = u / val
+            ur.setIsRelative(True)
+            expr = r'%s\left(1 \pm %s\right)%s' % (val.strNoUnit(), ur.dlatex(), unitExpr)
         else:
-            val *= 10**(-sciDigit)
-            u *= 10**(-sciDigit)
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
-        return r'$\begin{align}' + expr + r'\end{align}$'
+            if sciDigit == 0:
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'\left(%s \pm %s\right)%s' % (val.strNoUnit(), u.strNoUnit(), unitExpr)
+            else:
+                val *= 10**(-sciDigit)
+                u *= 10**(-sciDigit)
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
+        return expr
+    
+    def _repr_latex_(self):
+       return r'$\begin{align}%s\end{align}$' % self.latex()

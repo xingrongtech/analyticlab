@@ -66,8 +66,8 @@ def Nair(item, sigma, detLevel=0.05, delLevel=0.01, side='double', process=False
                 p_mean, lsub = ikeep.mean(process=True, needValue=True)
                 latex.add(lsub)
                 latex.add('\text{使用}')
-                latex.add(r'R_{%d}=\frac{%s_{(%d)}-\overline{%s}}{\sigma}=\frac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, keep[-1].dlatex(), p_mean.dlatex(2), sigmaExpr, R_max))
-                latex.add(r"R'_{%d}=\frac{\overline{%s}-%s_{(1)}}{\sigma}=\frac{%s-%s}{%g}=%.3f" % (n, symX, symX, p_mean.dlatex(), keep[0].dlatex(2), sigmaExpr, R_min))
+                latex.add(r'R_{%d}=\cfrac{%s_{(%d)}-\overline{%s}}{\sigma}=\cfrac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, keep[-1].dlatex(), p_mean.dlatex(2), sigmaExpr, R_max))
+                latex.add(r"R'_{%d}=\cfrac{\overline{%s}-%s_{(1)}}{\sigma}=\cfrac{%s-%s}{%g}=%.3f" % (n, symX, symX, p_mean.dlatex(), keep[0].dlatex(2), sigmaExpr, R_min))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}R_{1-\alpha/2}(n)=R_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Rv))
             if R_max > R_min:
                 if R_max > Rv:
@@ -129,7 +129,7 @@ def Nair(item, sigma, detLevel=0.05, delLevel=0.01, side='double', process=False
                 p_mean, lsub = ikeep.mean(process=True, needValue=True)
                 latex.add(lsub)
                 latex.add(r'\text{使用}')
-                latex.add(r'R_{%d}=\frac{%s_{(%d)}-\overline{%s}}{\sigma}=\frac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, keep[-1].dlatex(), p_mean.dlatex(2), sigmaExpr, R_max))
+                latex.add(r'R_{%d}=\cfrac{%s_{(%d)}-\overline{%s}}{\sigma}=\cfrac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, keep[-1].dlatex(), p_mean.dlatex(2), sigmaExpr, R_max))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}R_{1-\alpha}(n)=R_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Rv))
             if R_max > Rv:
                 Rv2 = R(rep_delLevel, n)  #查表获得剔除水平下的R值（单侧）
@@ -171,7 +171,7 @@ def Nair(item, sigma, detLevel=0.05, delLevel=0.01, side='double', process=False
                 p_mean, lsub = ikeep.mean(process=True, needValue=True)
                 latex.add(lsub)
                 latex.add(r'\text{使用}')
-                latex.add(r"R'_{%d}=\frac{\overline{%s}-%s_{(1)}}{\sigma}=\frac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), keep[0].dlatex(2), sigmaExpr, R_min))
+                latex.add(r"R'_{%d}=\cfrac{\overline{%s}-%s_{(1)}}{\sigma}=\cfrac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), keep[0].dlatex(2), sigmaExpr, R_min))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}R_{1-\alpha}(n)=R_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Rv))
             if R_min > Rv:
                 Rv2 = R(rep_delLevel, n)  #查表获得剔除水平下的R值（单侧）
@@ -288,8 +288,8 @@ def Grubbs(item, detLevel=0.05, delLevel=0.01, side='double', process=False, nee
                 else:
                     detected['stragglers'].append(nMin)
         if process:
-            latex.add(r'G_{%d}=\frac{%s_{(%d)}-\overline{%s}}{s}=\frac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, nMax.dlatex(), p_mean.dlatex(2), p_s.dlatex(), G_max))
-            latex.add(r"G_{%d}'=\frac{\overline{%s}-%s_{(1)}}{s}=\frac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), nMin.dlatex(2), p_s.dlatex(), G_min))
+            latex.add(r'G_{%d}=\cfrac{%s_{(%d)}-\overline{%s}}{s}=\cfrac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, nMax.dlatex(), p_mean.dlatex(2), p_s.dlatex(), G_max))
+            latex.add(r"G_{%d}'=\cfrac{\overline{%s}-%s_{(1)}}{s}=\cfrac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), nMin.dlatex(2), p_s.dlatex(), G_min))
             P = rep(detLevel, side=2)
             latex.add(r'\text{确定检验水平}\alpha=%g\text{，查表得临界值}G_{1-\alpha/2}(n)=G_{%g}(%d)=%.3f' % (detLevel, P, n, Gv))
             if G_max > G_min:
@@ -325,7 +325,7 @@ def Grubbs(item, detLevel=0.05, delLevel=0.01, side='double', process=False, nee
             else:
                 detected['stragglers'].append(nMax)
         if process:
-            latex.add(r'G_{%d}=\frac{%s_{(%d)}-\overline{%s}}{s}=\frac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, nMax.dlatex(), p_mean.dlatex(2), p_s.dlatex(), G_max))
+            latex.add(r'G_{%d}=\cfrac{%s_{(%d)}-\overline{%s}}{s}=\cfrac{%s-%s}{%s}=%.3f' % (n, symX, n, symX, nMax.dlatex(), p_mean.dlatex(2), p_s.dlatex(), G_max))
             P = rep(detLevel, side=1)
             latex.add(r'\text{确定检验水平}\alpha=%g\text{，查表得临界值}G_{1-\alpha}(n)=G_{%g}(%d)=%.3f' % (detLevel, P, n, Gv))
             if G_max > Gv:
@@ -349,7 +349,7 @@ def Grubbs(item, detLevel=0.05, delLevel=0.01, side='double', process=False, nee
             else:
                 detected['stragglers'].append(nMin)
         if process:
-            latex.add(r"G_{%d}'=\frac{\overline{%s}-%s_{(1)}}{s}=\frac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), nMin.dlatex(2), p_s.dlatex(), G_min))
+            latex.add(r"G_{%d}'=\cfrac{\overline{%s}-%s_{(1)}}{s}=\cfrac{%s-%s}{%s}=%.3f" % (n, symX, symX, p_mean.dlatex(), nMin.dlatex(2), p_s.dlatex(), G_min))
             P = rep(detLevel, side=1)
             latex.add(r'\text{确定检验水平}\alpha=%g\text{，查表得临界值}G_{1-\alpha}(n)=G_{%g}(%d)=%.3f' % (detLevel, P, n, Gv))
             if G_min > Gv:
@@ -425,17 +425,17 @@ def Dixon(item, detLevel=0.05, delLevel=0.01, side='double', process=False, need
                     latex.add(r'\text{取出这个观测值之后，余下的数据为}%s' % ikeep.latex())
                     latex.add(r'\text{对于剩余的}%d\text{个值（}n=%d\text{），使用}' % (n, n))
                 if n <= 7:
-                    latex.add(r'D_{%d}=r_{10}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_max))
-                    latex.add(r"D_{%d}'=r_{10}'=\frac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r'D_{%d}=r_{10}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_max))
+                    latex.add(r"D_{%d}'=r_{10}'=\cfrac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 10:
-                    latex.add(r'D_{%d}=r_{11}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
-                    latex.add(r"D_{%d}'=r_{11}'=\frac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r'D_{%d}=r_{11}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
+                    latex.add(r"D_{%d}'=r_{11}'=\cfrac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 13:
-                    latex.add(r'D_{%d}=r_{21}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
-                    latex.add(r"D_{%d}'=r_{21}'=\frac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r'D_{%d}=r_{21}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
+                    latex.add(r"D_{%d}'=r_{21}'=\cfrac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 100:
-                    latex.add(r'D_{%d}=r_{22}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(3)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[2].dlatex(2), D_max))
-                    latex.add(r"D_{%d}'=r_{22}'=\frac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-2, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-3].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r'D_{%d}=r_{22}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(3)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[2].dlatex(2), D_max))
+                    latex.add(r"D_{%d}'=r_{22}'=\cfrac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-2, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-3].dlatex(), keep[0].dlatex(2), D_min))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}\tilde{D}_{1-\alpha}(n)=\tilde{D}_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Dv))
             if D_max > D_min:
                 if D_max > Dv:
@@ -499,13 +499,13 @@ def Dixon(item, detLevel=0.05, delLevel=0.01, side='double', process=False, need
                     latex.add(r'\text{取出这个观测值之后，余下的数据为}%s' % ikeep.latex())
                     latex.add(r'\text{对于剩余的}%d\text{个观测值（}n=%d\text{），使用}' % (n, n))
                 if n <= 7:
-                    latex.add(r'D_{%d}=r_{10}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_max))
+                    latex.add(r'D_{%d}=r_{10}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_max))
                 elif n <= 10:
-                    latex.add(r'D_{%d}=r_{11}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
+                    latex.add(r'D_{%d}=r_{11}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-1, symX, n, symX, keep[-1].dlatex(), keep[-2].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
                 elif n <= 13:
-                    latex.add(r'D_{%d}=r_{21}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
+                    latex.add(r'D_{%d}=r_{21}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(2)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[1].dlatex(2), D_max))
                 elif n <= 100:
-                    latex.add(r'D_{%d}=r_{22}=\frac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(3)}}=\frac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[2].dlatex(2), D_max))
+                    latex.add(r'D_{%d}=r_{22}=\cfrac{%s_{(%d)}-%s_{(%d)}}{%s_{(%d)}-%s_{(3)}}=\cfrac{%s-%s}{%s-%s}=%.3f' % (n, symX, n, symX, n-2, symX, n, symX, keep[-1].dlatex(), keep[-3].dlatex(2), keep[-1].dlatex(), keep[2].dlatex(2), D_max))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}D_{1-\alpha}(n)=D_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Dv))
             if D_max > Dv:
                 Dv2 = D(rep_delLevel, n, side=1)  #查表获得剔除水平下的G值（单侧）
@@ -549,13 +549,13 @@ def Dixon(item, detLevel=0.05, delLevel=0.01, side='double', process=False, need
                     latex.add(r'\text{取出这个观测值之后，余下的数据为}%s' % ikeep.latex())
                     latex.add(r'\text{对于剩余的}%d\text{个值（}n=%d\text{），使用}' % (n, n))
                 if n <= 7:
-                    latex.add(r"D_{%d}'=r_{10}'=\frac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r"D_{%d}'=r_{10}'=\cfrac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-1].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 10:
-                    latex.add(r"D_{%d}'=r_{11}'=\frac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r"D_{%d}'=r_{11}'=\cfrac{%s_{(2)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[1].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 13:
-                    latex.add(r"D_{%d}'=r_{21}'=\frac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r"D_{%d}'=r_{21}'=\cfrac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-1, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-2].dlatex(), keep[0].dlatex(2), D_min))
                 elif n <= 100:
-                    latex.add(r"D_{%d}'=r_{22}'=\frac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\frac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-2, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-3].dlatex(), keep[0].dlatex(2), D_min))
+                    latex.add(r"D_{%d}'=r_{22}'=\cfrac{%s_{(3)}-%s_{(1)}}{%s_{(%d)}-%s_{(1)}}=\cfrac{%s-%s}{%s-%s}=%.3f" % (n, symX, symX, symX, n-2, symX, keep[2].dlatex(), keep[0].dlatex(2), keep[-3].dlatex(), keep[0].dlatex(2), D_min))
                 latex.add(r'\text{确定检出水平}\alpha=%g\text{，查表得临界值}D_{1-\alpha}(n)=D_{%g}(%d)=%.3f' % (detLevel, rep_detLevel, n, Dv))
             if D_min > Dv:
                 Dv2 = D(rep_delLevel, n, side=1)  #查表获得剔除水平下的G值（单侧）
@@ -670,7 +670,7 @@ def SkewKuri(item, detLevel=0.05, delLevel=0.01, side='double', process=False, n
                     d_mean = ikeep.mean() * 10**(-sciDigit)
                     sum4Expr = '+'.join([(r'%s^{4}' % (xi - d_mean).dlatex(1)) for xi in d_arr])
                     sum2Expr = '+'.join([(r'%s^{2}' % (xi - d_mean).dlatex(1)) for xi in d_arr])
-                latex.add(r'b_{k}=\frac{n\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{4}}{\left[\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{2}\right]^{2}}=\frac{%d\times\left[%s\right]}{\left[%s\right]^{2}}=%.2f' % (symX, symX, symX, symX, n, sum4Expr, sum2Expr, bk))
+                latex.add(r'b_{k}=\cfrac{n\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{4}}{\left[\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{2}\right]^{2}}=\cfrac{%d\times\left[%s\right]}{\left[%s\right]^{2}}=%.2f' % (symX, symX, symX, symX, n, sum4Expr, sum2Expr, bk))
                 latex.add(r"\text{确定检出水平}\alpha=%g\text{，查表得临界值}b'_{1-\alpha}(n)=b'_{%g}(%d)=%.2f" % (detLevel, rep_detLevel, n, bkv))
             if bk > bkv:
                 bkv2 = b(rep_delLevel, n, side=2)  #查表获得剔除水平下的G值（双侧）
@@ -719,7 +719,7 @@ def SkewKuri(item, detLevel=0.05, delLevel=0.01, side='double', process=False, n
                     d_mean = ikeep.mean() * 10**(-sciDigit)
                     sum3Expr = '+'.join([(r'%s^{3}' % (xi - d_mean).dlatex(1)) for xi in d_arr])
                     sum2Expr = '+'.join([(r'%s^{2}' % (xi - d_mean).dlatex(1)) for xi in d_arr])
-                latex.add(r'b_{s}=\frac{\sqrt{n}\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{3}}{\left[\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{2}\right]^{3/2}}=\frac{\sqrt{%d}\times\left[%s\right]}{\left[%s\right]^{3/2}}=%.2f' % (symX, symX, symX, symX, n, sum3Expr, sum2Expr, bs))
+                latex.add(r'b_{s}=\cfrac{\sqrt{n}\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{3}}{\left[\sum\limits_{i=1}^n \left(%s_{i}-\overline{%s}\right)^{2}\right]^{3/2}}=\cfrac{\sqrt{%d}\times\left[%s\right]}{\left[%s\right]^{3/2}}=%.2f' % (symX, symX, symX, symX, n, sum3Expr, sum2Expr, bs))
                 latex.add(r"\text{确定检出水平}\alpha=%g\text{，查表得临界值}b_{1-\alpha}(n)=b_{%g}(%d)=%.2f" % (detLevel, rep_detLevel, n, bsv))
             if side == 'up':
                 if bs > bsv:

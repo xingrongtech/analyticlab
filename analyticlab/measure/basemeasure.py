@@ -27,6 +27,8 @@ class BaseMeasure(measure.Measure):
     __staUnc = None
     __q = 1
     __data = None
+    __linearfit_data = None
+    useRelUnc = False  #决定由str、latex生成的测量结果中，不确定度是否使用相对不确定度表示
     
     def __init__(self, data, instrument=None, unit=None, sym=None, description=None):
         '''初始化一个BaseMeasure直接测量
@@ -154,9 +156,10 @@ class BaseMeasure(measure.Measure):
                 for i in range(len(self.__data)):
                     self.__data[i]._NumItem__sym = '{%s_{%d}}' % (self.__sym, i+1)
         self._Measure__symbol = Symbol(self.__sym, real=True)
-        if unit != None or instrument != None:
+        if unit != None:
             self.__value._Num__q = self.__q
-            instrument.q = self.__q
+            if instrument != None:
+                instrument.q = self.__q
         if measure.Measure.process:
             self._Measure__vl = LSym(self.__sym, self.__value)
         else:
@@ -170,6 +173,7 @@ class BaseMeasure(measure.Measure):
         self._Measure__lsyms = {}
         self._Measure__consts = {}
         self.__staUnc = self.__calStaUnc()
+        self.useRelUnc = False
         
     def fromReport(report, unit=None, sym=None, distribution=1, description=None, **param):
         '''从不确定度报告中获得BaseMeasure
@@ -244,12 +248,12 @@ class BaseMeasure(measure.Measure):
                     else:
                         sumExpr = r'\left[ %s \right]\times 10^{%d}' % ('+'.join(sub_sumExpr), sciDigit)
                 if nSame:
-                    formula = r'\frac{1}{mn}\sum\limits_{i=1}^m\sum\limits_{j=1}^n %s_{ij}' % self.__sym
-                    meanExpr = r'\frac{1}{%d \times %d}%s' % (m, n, sumExpr)
+                    formula = r'\cfrac{1}{mn}\sum\limits_{i=1}^m\sum\limits_{j=1}^n %s_{ij}' % self.__sym
+                    meanExpr = r'\cfrac{1}{%d \times %d}%s' % (m, n, sumExpr)
                 else:
-                    formula = r'\frac{1}{\sum_{i=1}^m n_i}\sum\limits_{i=1}^{m}\sum\limits_{j=1}^{n_i} %s_{ij}' % self.__sym
+                    formula = r'\cfrac{1}{\sum_{i=1}^m n_i}\sum\limits_{i=1}^{m}\sum\limits_{j=1}^{n_i} %s_{ij}' % self.__sym
                     n_sumExpr = '+'.join([str(len(di._NumItem__arr)) for di in self.__data])
-                    meanExpr = r'\frac{1}{%s}%s' % (n_sumExpr, sumExpr)
+                    meanExpr = r'\cfrac{1}{%s}%s' % (n_sumExpr, sumExpr)
                 latex = LaTeX(r'\overline{%s}=%s=%s=%s' % (self.__sym, formula, meanExpr, self.__value.latex()))
                 if needValue:
                     return self.__value, latex
@@ -369,24 +373,29 @@ class BaseMeasure(measure.Measure):
         '''获得测量值和不确定度的字符串形式
         【返回值】
         str：(测量值±不确定度)，如已给出单位，会附加单位'''
+        unitExpr = format_units_unicode(self.__q)
         val = self.value()
         u = self.unc()
-        unitExpr = format_units_unicode(self.__q)
         sciDigit = val._Num__sciDigit()
-        if sciDigit == 0:
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'%s±%s' % (val.strNoUnit(), u.strNoUnit())
-            if unitExpr != '':
-                expr = '(%s)%s' % (expr, unitExpr)
+        if self.useRelUnc:
+            ur = u / val
+            ur.setIsRelative(True)
+            expr = r'%s(1±%s)%s' % (val.strNoUnit(), ur, unitExpr)
         else:
-            val *= 10**(-sciDigit)
-            u *= 10**(-sciDigit)
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'(%s±%s)×10%s%s' % (val.strNoUnit(), u.strNoUnit(), usub(sciDigit), unitExpr)
+            if sciDigit == 0:
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'%s±%s' % (val.strNoUnit(), u.strNoUnit())
+                if unitExpr != '':
+                    expr = '(%s)%s' % (expr, unitExpr)
+            else:
+                val *= 10**(-sciDigit)
+                u *= 10**(-sciDigit)
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'(%s±%s)×10%s%s' % (val.strNoUnit(), u.strNoUnit(), usub(sciDigit), unitExpr)
         return expr
         
     def __repr__(self):
@@ -395,21 +404,29 @@ class BaseMeasure(measure.Measure):
         str：(测量值±不确定度)，如已给出单位，会附加单位'''
         return self.__str__()
     
-    def _repr_latex_(self):
+    def latex(self):
+        unitExpr = format_units_latex(self.__q)
         val = self.value()
         u = self.unc()
-        unitExpr = format_units_latex(self.__q)
         sciDigit = val._Num__sciDigit()
-        if sciDigit == 0:
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'\left(%s \pm %s\right)%s' % (val.strNoUnit(), u.strNoUnit(), unitExpr)
+        if self.useRelUnc:
+            ur = u / val
+            ur.setIsRelative(True)
+            expr = r'%s\left(1 \pm %s\right)%s' % (val.strNoUnit(), ur.dlatex(), unitExpr)
         else:
-            val *= 10**(-sciDigit)
-            u *= 10**(-sciDigit)
-            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
-            while float(u.strNoUnit()) == 0:
-                u.remainOneMoreDigit()
-            expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
-        return r'$\begin{align}' + expr + r'\end{align}$'
+            if sciDigit == 0:
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'\left(%s \pm %s\right)%s' % (val.strNoUnit(), u.strNoUnit(), unitExpr)
+            else:
+                val *= 10**(-sciDigit)
+                u *= 10**(-sciDigit)
+                u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+                while float(u.strNoUnit()) == 0:
+                    u.remainOneMoreDigit()
+                expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
+        return expr
+    
+    def _repr_latex_(self):
+        return r'$\begin{align}%s\end{align}$' % self.latex()

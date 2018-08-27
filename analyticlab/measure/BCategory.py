@@ -22,7 +22,7 @@ def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=T
     ①process为False时，返回值为Num类型的B类不确定度。
     ②process为True且needValue为False时，返回值为LaTeX类型的计算过程。
     ③process为True且needValue为True时，返回值为Num类型的B类不确定度和LaTeX类型的计算过程组成的元组。'''
-    a = Num(instrument.halfWidth, instrument.q)
+    a = instrument.a
     a.setSciBound(9)
     if instrument.distribution <= 4:
         uB = a / kValue[instrument.distribution]
@@ -32,9 +32,9 @@ def b(instrument, sym=None, process=False, needValue=False, remainOneMoreDigit=T
         uB.remainOneMoreDigit()
     if process:
         if instrument.distribution <= 4:
-            latex = LaTeX(r'u_{%s B}=\frac{a}{k}=\frac{%s}{%s}=%s' % (sym, a.dlatex(), kExpr[instrument.distribution], uB.latex()))
+            latex = LaTeX(r'u_{%s B}=\cfrac{a}{k}=\cfrac{%s}{%s}=%s' % (sym, a.dlatex(), kExpr[instrument.distribution], uB.latex()))
         else:
-            latex = LaTeX(r'u_{%s B}=\frac{a}{k}=\frac{%s}{\sqrt{6/(1+%g^{2})}}=%s' % (sym, a.dlatex(), instrument.beta, uB.latex()))
+            latex = LaTeX(r'u_{%s B}=\cfrac{a}{k}=\cfrac{%s}{\sqrt{6/(1+%g^{2})}}=%s' % (sym, a.dlatex(), instrument.beta, uB.latex()))
         if needValue:
             return uB, latex
         else:

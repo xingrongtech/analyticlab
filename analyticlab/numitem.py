@@ -13,7 +13,7 @@ from .const import Const
 from .latexoutput import LaTeX
 from .lookup import t, t_repl
 from .system.unit_open import openUnit, closeUnit
-from .system.format_units import format_units_unicode, format_units_latex, deg
+from .system.format_units import format_units_unicode, deg
 from .system.statformat import statFormat, getMaxDeltaDigit
 from .system.exceptions import expressionInvalidException, muNotFoundException, itemNotSameLengthException
 
@@ -26,10 +26,11 @@ class NumItem():
     __q = 1
     __index = 0
     __mu = None
+    __sym = None
     __gd_valid = 0
     __isRelative = False
     
-    def __init__(self, nums, unit=None, mu=None, isRelative=False, sym=None, muSym=r'\mu'):
+    def __init__(self, nums, unit=None, mu=None, sym=None, muSym=r'\mu'):
         '''初始化一个NumItem数组
         【参数说明】
         1.nums：要初始化的数值，可以是str或list：
@@ -39,9 +40,8 @@ class NumItem():
         (4)LSymItem：从由LSymItem符号组中获取Num数值，生成NumItem。
         2.unit（可选，str）：单位。当unit为None时，会选择list<Num>或list<LSym>中第1个元素的unit，或者LSymItem的unit作为NumItem的unit，否则没有单位。默认unit=None。
         3.mu（可选，str）：真值μ，用于误差分析。默认不给出，但进行误差分析时，必须给出μ。默认mu=None。
-        4.isRelative（可选，bool）：是否为相对比（百分数形式），默认isRelative=False。
-        5.sym（可选，str）：符号，一般情况下不需要给出，当需要展示计算过程时，最好给出。默认sym=None。
-        6.muSym（可选，str）：真值μ对应的符号，默认muSym=r'\mu'。
+        4.sym（可选，str）：符号，一般情况下不需要给出，当需要展示计算过程时，最好给出。默认sym=None。
+        5.muSym（可选，str）：真值μ对应的符号，默认muSym=r'\mu'。
         【应用举例】
         >>> t = NumItem('1.62 1.66 1.58 1.71 1.69')
         >>>
@@ -49,8 +49,8 @@ class NumItem():
         >>> p = NumItem([p1, p2, p3])
         >>>
         >>> t = NumItem('1.62 1.66  58 1.71 1.69', mu='1.65')
-        >>> w = NumItem('38.42 38.56 38.47 38.41 38.55', isRelative=True)
-        >>> t = NumItem('1.62 1.66 1.58 1.71 1.69', sym='t', unit='s')
+        >>> w = NumItem('38.42 38.56 38.47 38.41 38.55')
+        >>> t = NumItem('1.62 1.66 1.58 1.71 1.69', 's', sym='t')
         【错误案例】
         >>> t = NumItem(1.62,1.66,1.58,1.71,1.69)  #不能直接用float或int初始化数组
         >>> t = NumItem([1.62,1.66,1.58,1.71,1.69])  #使用list初始化数组时，数值必须是Num
@@ -98,7 +98,6 @@ class NumItem():
                     ri._Num__q = self.__q
         else:
             raise expressionInvalidException('用于创建数组的参数无效')
-        self.setIsRelative(isRelative)                
         if mu != None:
             if type(mu) == str:
                 self.__mu = Num(mu, self.__q)
@@ -662,16 +661,16 @@ class NumItem():
                 if sciDigit == 0:
                     sumExpr = '+'.join([n.dlatex(2) for n in self.__arr])
                     if len([x for x in self.__arr if x < 0]) == 0:
-                        latex.add(r'\overline{%s}=\frac{1}{n}\sum\limits_{i=1}^n %s_{i}=\frac{1}{%d}\left(%s\right)=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, result.latex()))
+                        latex.add(r'\overline{%s}=\cfrac{1}{n}\sum\limits_{i=1}^n %s_{i}=\cfrac{1}{%d}\left(%s\right)=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, result.latex()))
                     else:
-                        latex.add(r'\overline{%s}=\frac{1}{n}\sum\limits_{i=1}^n %s_{i}=\frac{1}{%d}\left[%s\right]=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, result.latex()))
+                        latex.add(r'\overline{%s}=\cfrac{1}{n}\sum\limits_{i=1}^n %s_{i}=\cfrac{1}{%d}\left[%s\right]=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, result.latex()))
                 else:
                     d_arr = self * 10**(-sciDigit)
                     sumExpr = '+'.join([n.dlatex(2) for n in d_arr])
                     if len([x for x in self.__arr if x < 0]) == 0:
-                        latex.add(r'\overline{%s}=\frac{1}{n}\sum\limits_{i=1}^n %s_{i}=\frac{1}{%d}\left(%s\right)\times 10^{%d}=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, sciDigit, result.latex()))
+                        latex.add(r'\overline{%s}=\cfrac{1}{n}\sum\limits_{i=1}^n %s_{i}=\cfrac{1}{%d}\left(%s\right)\times 10^{%d}=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, sciDigit, result.latex()))
                     else:
-                        latex.add(r'\overline{%s}=\frac{1}{n}\sum\limits_{i=1}^n %s_{i}=\frac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, sciDigit, result.latex()))
+                        latex.add(r'\overline{%s}=\cfrac{1}{n}\sum\limits_{i=1}^n %s_{i}=\cfrac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (self.__sym, self.__sym, len(self.__arr), sumExpr, sciDigit, result.latex()))
                 if needValue:
                     return result, latex
                 else:
@@ -698,7 +697,7 @@ class NumItem():
             if n % 2 == 1:
                 latex.add(r'\text{中位数为}%s_{%d}=%s' % (self.__sym, n//2+1, res.latex()))
             else:
-                latex.add(r'\text{中位数为}\frac{%s_{%d}+%s_{%d}}{2}=\frac{%s+%s}{2}=%s' % (self.__sym, n//2, self.__sym, n//2+1, s[n//2-1].dlatex(), s[n//2].dlatex(), res.latex()))  
+                latex.add(r'\text{中位数为}\cfrac{%s_{%d}+%s_{%d}}{2}=\cfrac{%s+%s}{2}=%s' % (self.__sym, n//2, self.__sym, n//2+1, s[n//2-1].dlatex(), s[n//2].dlatex(), res.latex()))  
             if needValue:
                 return res, latex
             else:
@@ -765,12 +764,12 @@ class NumItem():
                 p_delta = self - mean
                 sciDigit = self.__sciDigit()
                 if sciDigit == 0:
-                    sumExpr = '+'.join([(r'%s^{2}' % di.dlatex(1)) for di in p_delta])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, result.latex()))
+                    sumExpr = '+'.join([(r'%s^2' % di.dlatex(1)) for di in p_delta])
+                    latex.add(r's_{%s}=\sqrt{\cfrac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^2}=\sqrt{\cfrac{1}{%d}\left[%s\right]}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, result.latex()))
                 else:
                     d_delta = p_delta * 10**(-sciDigit)
-                    sumExpr = '+'.join([(r'%s^{2}' % di.dlatex(1)) for di in d_delta])
-                    latex.add(r's_{%s}=\sqrt{\frac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^{2}}=\sqrt{\frac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, sciDigit, result.latex()))
+                    sumExpr = '+'.join([(r'%s^2' % di.dlatex(1)) for di in d_delta])
+                    latex.add(r's_{%s}=\sqrt{\cfrac{1}{n-1}\sum\limits_{i=1}^n\left(%s_{i}-\overline{%s}\right)^2}=\sqrt{\cfrac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (self.__sym, self.__sym, self.__sym, len(self.__arr)-1, sumExpr, sciDigit, result.latex()))
                 if needValue:
                     return result, latex
                 else:
@@ -796,7 +795,7 @@ class NumItem():
         result = s / mean
         result.setIsRelative(True)
         if process:
-            latex.add(r's_{r}=\frac{s_{%s}}{\overline{%s}}\times 100\%%=\frac{%s}{%s}\times 100\%%=%s' % (self.__sym, self.__sym, s.dlatex(), mean.dlatex(), result.latex()))
+            latex.add(r's_{r}=\cfrac{s_{%s}}{\overline{%s}}\times 100\%%=\cfrac{%s}{%s}\times 100\%%=%s' % (self.__sym, self.__sym, s.dlatex(), mean.dlatex(), result.latex()))
             if needValue:
                 return result, latex
             else:
@@ -820,9 +819,9 @@ class NumItem():
             mean, latex = self.mean(process=True, needValue=True)
             meanExpr = mean.dlatex()
             meanExpr2 = mean.dlatex(2)
-            latex.add(r'根据公式d_{ri}=\frac{%s_{i}-\overline{%s}}{\overline{%s}}\times 100\%%，得' % (self.__sym, self.__sym, self.__sym))
+            latex.add(r'根据公式d_{ri}=\cfrac{%s_{i}-\overline{%s}}{\overline{%s}}\times 100\%%，得' % (self.__sym, self.__sym, self.__sym))
             for i in range(len(self.__arr)):
-                latex.add(r'd_{r%d}=\frac{%s-%s}{%s}\times 100\%%=%s' % (i+1, self.__arr[i].dlatex(), meanExpr2, meanExpr, result.__arr[i].latex()))
+                latex.add(r'd_{r%d}=\cfrac{%s-%s}{%s}\times 100\%%=%s' % (i+1, self.__arr[i].dlatex(), meanExpr2, meanExpr, result.__arr[i].latex()))
             if needValue:
                 return result, latex
             else:
@@ -844,23 +843,23 @@ class NumItem():
         result._Num__q = self.__q
         if process:
             sciDigit = self.__sciDigit()
-            fracExpr = r'\frac{1}{%d}' % len(self.__arr)
+            fracExpr = r'\cfrac{1}{%d}' % len(self.__arr)
             p_mean, latex = self.mean(process=True, needValue=True)
             if sciDigit == 0:
                 meanExpr = p_mean.dlatex(2)
                 sumExpr = '+'.join([(r'\left\lvert %s-%s\right\rvert' % (xi.dlatex(3), meanExpr)) for xi in self.__arr])
                 if len([x for x in self.__arr if x < 0]) == 0:
-                    latex.add(r'\overline{d}=\frac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left(%s\right)=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, result.latex()))
+                    latex.add(r'\overline{d}=\cfrac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left(%s\right)=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, result.latex()))
                 else:
-                    latex.add(r'\overline{d}=\frac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left[%s\right]=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, result.latex()))
+                    latex.add(r'\overline{d}=\cfrac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left[%s\right]=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, result.latex()))
             else:
                 d_arr = self * 10**(-sciDigit)
                 meanExpr = (p_mean * 10**(-sciDigit)).dlatex(2)
                 sumExpr = '+'.join([(r'\left\lvert %s-%s\right\rvert' % (xi.dlatex(3), meanExpr)) for xi in d_arr._NumItem__arr])
                 if len([x for x in self.__arr if x < 0]) == 0:
-                    latex.add(r'\overline{d}=\frac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left(%s\right)\times 10^{%d}=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, sciDigit, result.latex()))
+                    latex.add(r'\overline{d}=\cfrac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left(%s\right)\times 10^{%d}=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, sciDigit, result.latex()))
                 else:
-                    latex.add(r'\overline{d}=\frac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left[%s\right]\times 10^{%d}=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, sciDigit, result.latex()))
+                    latex.add(r'\overline{d}=\cfrac{1}{n}\sum\limits_{i=1}^n\left\lvert %s_{i}-\overline{%s}\right\rvert= %s \left[%s\right]\times 10^{%d}=%s' % (self.__sym, self.__sym, fracExpr, sumExpr, sciDigit, result.latex()))
             if needValue:
                 return result, latex
             else:
@@ -886,7 +885,7 @@ class NumItem():
         result = d / mean
         result.setIsRelative(True)
         if process:
-            latex.add(r'\overline{d}_{r}=\frac{\overline{d}}{\overline{%s}}\times 100\%%=\frac{%s}{%s} \times 100\%%=%s' % (self.__sym, d.dlatex(), mean.dlatex(), result.latex()))
+            latex.add(r'\overline{d}_{r}=\cfrac{\overline{d}}{\overline{%s}}\times 100\%%=\cfrac{%s}{%s} \times 100\%%=%s' % (self.__sym, d.dlatex(), mean.dlatex(), result.latex()))
             if needValue:
                 return result, latex
             else:
@@ -941,11 +940,11 @@ class NumItem():
                 muExpr = self.__mu.dlatex()
                 muExpr2 = self.__mu.dlatex(2)
                 if len(self.__arr) == 1:
-                    latex.add(r'\text{%s}E_{r}=\frac{\left|%s-%s\right|}{%s}\times 100\%%=\frac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (description, self.__sym, self.__muSym, self.__muSym, self.__arr[0].dlatex(), muExpr2, muExpr, result.__arr[0].latex()))
+                    latex.add(r'\text{%s}E_{r}=\cfrac{\left|%s-%s\right|}{%s}\times 100\%%=\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (description, self.__sym, self.__muSym, self.__muSym, self.__arr[0].dlatex(), muExpr2, muExpr, result.__arr[0].latex()))
                 else:
-                    latex.add(r'\text{根据公式}E_{ri}=\frac{\left\lvert %s_{i}-%s\right\rvert}{%s}\times 100\%%，得' % (self.__sym, self.__muSym, self.__muSym))
+                    latex.add(r'\text{根据公式}E_{ri}=\cfrac{\left\lvert %s_{i}-%s\right\rvert}{%s}\times 100\%%，得' % (self.__sym, self.__muSym, self.__muSym))
                     for i in range(len(self.__arr)):
-                        latex.add(r'E_{r%d}=\frac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (i+1, self.__arr[i].dlatex(), muExpr2, muExpr, result.__arr[i].latex()))
+                        latex.add(r'E_{r%d}=\cfrac{\left\lvert %s-%s \right\rvert}{%s}\times 100\%%=%s' % (i+1, self.__arr[i].dlatex(), muExpr2, muExpr, result.__arr[i].latex()))
                 if needValue:
                     return result, latex
                 else:
@@ -989,12 +988,12 @@ class NumItem():
         if process:
             latex = self.staDevi(process=True, remainOneMoreDigit=True)
             if side == 'double':
-                latex.add(r'\text{对于双侧区间，}P=1-\frac{\alpha}{2}=%g\text{，查表得$n$=%d时，}t_{%g}\left(%d\right)=%.3f' % (confLevel, n, confLevel, n-1, tv))
+                latex.add(r'\text{对于双侧区间，}P=1-\cfrac{\alpha}{2}=%g\text{，查表得$n$=%d时，}t_{%g}\left(%d\right)=%.3f' % (confLevel, n, confLevel, n-1, tv))
             elif side == 'left' or side == 'right':
-                latex.add((r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得$n$=%d时，}t_{%g}\left(%d\right)=%.3f") % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
+                latex.add((r"\text{对于单侧区间，}P=1-\cfrac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得$n$=%d时，}t_{%g}\left(%d\right)=%.3f") % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
         if side == 'double':
             if process:
-                latex.add(r'\text{置信区间为}\left(\overline{%s}-\frac{ts_{%s}}{\sqrt{n}},\overline{%s}+\frac{ts_{%s}}{\sqrt{n}}\right)\text{，代入得}\left(%s,%s\right)' % (self.__sym, self.__sym, self.__sym, self.__sym, (mean - unc).latex(), (mean + unc).latex()))
+                latex.add(r'\text{置信区间为}\left(\overline{%s}-\cfrac{ts_{%s}}{\sqrt{n}},\overline{%s}+\cfrac{ts_{%s}}{\sqrt{n}}\right)\text{，代入得}\left(%s,%s\right)' % (self.__sym, self.__sym, self.__sym, self.__sym, (mean - unc).latex(), (mean + unc).latex()))
             if needValue and process:
                 return ((mean - unc, mean + unc), latex)
             elif process:
@@ -1003,7 +1002,7 @@ class NumItem():
                 return (mean - unc, mean + unc)
         elif side == 'left':
             if process:
-                latex.add(r'\text{置信区间为}\left(\overline{%s}-\frac{ts_{%s}}{\sqrt{n}},+\infty\right)\text{，代入得}\left(%s, +\infty\right)' % (self.__sym, self.__sym, (mean - unc).latex()))
+                latex.add(r'\text{置信区间为}\left(\overline{%s}-\cfrac{ts_{%s}}{\sqrt{n}},+\infty\right)\text{，代入得}\left(%s, +\infty\right)' % (self.__sym, self.__sym, (mean - unc).latex()))
             if needValue and process:
                 return ((mean - unc, '+∞'), latex)
             elif process:
@@ -1012,7 +1011,7 @@ class NumItem():
                 return (mean - unc, '+∞')
         elif side == 'right':
             if process:
-               latex.add(r'\text{置信区间为}\left(-\infty,\overline{%s}+\frac{ts_{%s}}{\sqrt{n}}\right)\text{，代入得}\left(-\infty, %s\right)' % (self.__sym, self.__sym, (mean + unc).latex()))
+               latex.add(r'\text{置信区间为}\left(-\infty,\overline{%s}+\cfrac{ts_{%s}}{\sqrt{n}}\right)\text{，代入得}\left(-\infty, %s\right)' % (self.__sym, self.__sym, (mean + unc).latex()))
             if needValue and process:
                 return (('-∞', mean + unc), latex)
             elif process:
@@ -1049,11 +1048,11 @@ class NumItem():
             if process: 
                 p_mean = self.mean()
                 p_s, latex = self.staDevi(process=True, remainOneMoreDigit=True, needValue=True)
-                latex.add(r't=\frac{\left\lvert\overline{%s}-%s\right\rvert}{s_{%s}/\sqrt{n}}=\frac{\left\lvert%s-%s\right\rvert}{%s/\sqrt{%d}}=%.3f' % (self.__sym, self.__muSym, self.__sym, p_mean.dlatex(), self.__mu.dlatex(2), p_s.dlatex(), n, tCal))
+                latex.add(r't=\cfrac{\left\lvert\overline{%s}-%s\right\rvert}{s_{%s}/\sqrt{n}}=\cfrac{\left\lvert%s-%s\right\rvert}{%s/\sqrt{%d}}=%.3f' % (self.__sym, self.__muSym, self.__sym, p_mean.dlatex(), self.__mu.dlatex(2), p_s.dlatex(), n, tCal))
                 if side == 'double':
-                    latex.add(r'\text{对于双侧区间，}P=1-\frac{\alpha}{2}=%g\text{，查表得$n$=%d时，}t_{1-\alpha/2}(n-1)=t_{%g}(%d)=%.3f' % (confLevel, n, confLevel, n-1, tv))
+                    latex.add(r'\text{对于双侧区间，}P=1-\cfrac{\alpha}{2}=%g\text{，查表得$n$=%d时，}t_{1-\alpha/2}(n-1)=t_{%g}(%d)=%.3f' % (confLevel, n, confLevel, n-1, tv))
                 else:
-                    latex.add(r"\text{对于单侧区间，}P=1-\frac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得$n$=%d时，}t_{1-\alpha}(n-1)=t_{%g}(%d)=%.3f" % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
+                    latex.add(r"\text{对于单侧区间，}P=1-\cfrac{\alpha}{2}=%g\text{时，}P'=1-\alpha=%g\text{，查表得$n$=%d时，}t_{1-\alpha}(n-1)=t_{%g}(%d)=%.3f" % (confLevel, t_repl(confLevel), n, t_repl(confLevel), n-1, tv))
                 if tCal >= tv:
                     if side == 'double':
                         latex.add(r't>t_{%g}(%d)\text{，故在置信度}P=%g\text{下，认定测量结果与真值有明显差异，存在系统误差}' % (confLevel, n-1, confLevel))

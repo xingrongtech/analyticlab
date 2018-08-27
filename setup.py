@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analyticlab",
-    version="0.3.1",
+    version="0.3.1-dev2",
     author="xingrongtech",
     author_email="wzv100@163.com",
     description="A library for experimental data calculation, treatment and display, which can be used for College Physics Experiment, Analytical Chemistry, etc.",
@@ -20,7 +20,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/xingrongtech/analyticlab",
     install_requires = ['numpy', 'scipy', 'sympy', 'quantities'],
-    keywords=['calculation', 'analysis', 'display'],
+    keywords=['calculation', 'analysis', 'measure', 'uncertainty', 'display'],
     packages=['analyticlab', 'analyticlab.lookup', 
               'analyticlab.system', 'analyticlab.measure'],
     license='MIT License',
