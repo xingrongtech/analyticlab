@@ -397,6 +397,7 @@ class Measure():
             ur.setIsRelative(True)
             expr = r'%s\left(1 \pm %s\right)%s' % (val.strNoUnit(), ur.dlatex(), unitExpr)
         else:
+<<<<<<< HEAD
             if sciDigit == 0:
                 u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
                 while float(u.strNoUnit()) == 0:
@@ -413,3 +414,15 @@ class Measure():
     
     def _repr_latex_(self):
        return r'$\begin{align}%s\end{align}$' % self.latex()
+=======
+            val *= 10**(-sciDigit)
+            u *= 10**(-sciDigit)
+            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+            while float(u.strNoUnit()) == 0:
+                u.remainOneMoreDigit()
+            expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
+        return expr
+    
+    def _repr_latex_(self):
+       return r'$\begin{align}%s\end{align}$' % self.latex()
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e

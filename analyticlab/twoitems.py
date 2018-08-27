@@ -63,7 +63,11 @@ def cov(X, Y, process=False, processWithMean=True, needValue=False, dec=False, r
                 for i in range(n):
                     sumExpr += r'%s\times%s+' % ((X[i] - meanX).dlatex(1), (Y[i] - meanY).dlatex(1))
                 sumExpr = sumExpr[:-1]
+<<<<<<< HEAD
                 latex.add(r's_{%s%s}=\cfrac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\cfrac{1}{%d}\left[%s\right]=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, result.latex()))
+=======
+                latex.add(r's_{%s%s}=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, result.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
             else:
                 dX = X * 10**(-sciDigit)
                 dY = Y * 10**(-sciDigit)
@@ -72,7 +76,11 @@ def cov(X, Y, process=False, processWithMean=True, needValue=False, dec=False, r
                 for i in range(n):
                     sumExpr += r'%s\times%s+' % ((dX[i] - dmeanX).dlatex(1), (dY[i] - dmeanY).dlatex(1))
                 sumExpr = sumExpr[:-1]
+<<<<<<< HEAD
                 latex.add(r's_{%s%s}=\cfrac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\cfrac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, sciDigit*2, result.latex()))
+=======
+                latex.add(r's_{%s%s}=\frac{1}{n-1}\sum\limits_{i=1}^n [(%s_{i}-\overline{%s})(%s_{i}-\overline{%s})]=\frac{1}{%d}\left[%s\right]\times 10^{%d}=%s' % (symX, symY, symX, symX, symY, symY, n-1, sumExpr, sciDigit*2, result.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
             if needValue:
                 return result, latex
             else:
@@ -110,7 +118,11 @@ def corrCoef(X, Y, process=False, needValue=False, remainOneMoreDigit=False):
         result.cutOneDigit()
     if process:
         symX, symY = X._NumItem__sym, Y._NumItem__sym
+<<<<<<< HEAD
         latex.add(r'r_{%s%s}=\cfrac{s_{%s%s}}{s_{%s}s_{%s}}=\cfrac{%s}{%s\times %s}=%s' % (symX, symY, symX, symY, symX, symY, sXY.dlatex(), sX.dlatex(2), sY.dlatex(2), result.latex()))
+=======
+        latex.add(r'r_{%s%s}=\frac{s_{%s%s}}{s_{%s}s_{%s}}=\frac{%s}{%s\times %s}=%s' % (symX, symY, symX, symY, symX, symY, sXY.dlatex(), sX.dlatex(2), sY.dlatex(2), result.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
         if needValue:
             return result, latex
         else:
@@ -244,17 +256,30 @@ def linear_fit(X, Y, process=False, needValue=False):
     A = BaseMeasure(a, Ins(ua, 0), sym='a', description='截距$a$')
     B = BaseMeasure(b, Ins(ub, 0), sym='b', description='斜率$b$')
     if process:
+<<<<<<< HEAD
         latex.add(r'b=\cfrac{s_{%s%s}}{s_{%s}^2}=\cfrac{%s}{%s^2}=%s' % (X._NumItem__sym, Y._NumItem__sym, X._NumItem__sym, sXY.dlatex(), sX.dlatex(1), b.latex()))
+=======
+        latex.add(r'b=\frac{s_{%s%s}}{s_{%s}^2}=\frac{%s}{%s^2}=%s' % (X._NumItem__sym, Y._NumItem__sym, X._NumItem__sym, sXY.dlatex(), sX.dlatex(1), b.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
         latex.add(r'a=\overline{%s}-b\overline{%s}=%s-%s \times %s=%s' % (Y._NumItem__sym, X._NumItem__sym, meanY.dlatex(), b.dlatex(2), meanX.dlatex(2), a.latex()))
         sciDigit = v._NumItem__sciDigit()
         if sciDigit == 0:
             sumExpr = '+'.join([(r'%s^2' % vi.dlatex(1)) for vi in v._NumItem__arr])
+<<<<<<< HEAD
             latex.add(r's=\sqrt{\cfrac{1}{n-2}\sum\limits_{i=1}^n \left[y_i-\left(a+bx_i\right)\right]^2}=\sqrt{\cfrac{1}{%d}\left[%s\right]}=%s' % (n-2, sumExpr, s.latex()))
         else:
             v_cut = v * 10**(-sciDigit)
             sumExpr = '+'.join([(r'%s^2' % vi.dlatex(1)) for vi in v_cut._NumItem__arr])
             latex.add(r's=\sqrt{\cfrac{1}{n-2}\sum\limits_{i=1}^n \left[y_i-\left(a+bx_i\right)\right]^2}=\sqrt{\cfrac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (n-2, sumExpr, sciDigit, s.latex()))
         latex.add(r'u_b=\cfrac{s}{s_{%s}}=\cfrac{%s}{%s}=%s' % (X._NumItem__sym, s.dlatex(), sX.dlatex(), ub.latex()))
+=======
+            latex.add(r's=\sqrt{\frac{1}{n-2}\sum\limits_{i=1}^n \left[y_i-\left(a+bx_i\right)\right]^2}=\sqrt{\frac{1}{%d}\left[%s\right]}=%s' % (n-2, sumExpr, s.latex()))
+        else:
+            v_cut = v * 10**(-sciDigit)
+            sumExpr = '+'.join([(r'%s^2' % vi.dlatex(1)) for vi in v_cut._NumItem__arr])
+            latex.add(r's=\sqrt{\frac{1}{n-2}\sum\limits_{i=1}^n \left[y_i-\left(a+bx_i\right)\right]^2}=\sqrt{\frac{1}{%d}\left[%s\right]}\times 10^{%d}=%s' % (n-2, sumExpr, sciDigit, s.latex()))
+        latex.add(r'u_b=\frac{s}{s_{%s}}=\frac{%s}{%s}=%s' % (X._NumItem__sym, s.dlatex(), sX.dlatex(), ub.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
         sciDigit = X._NumItem__sciDigit()
         if sciDigit == 0:
             sumExpr = '+'.join([(r'%s^2' % xi.dlatex(1)) for xi in X._NumItem__arr])
@@ -266,9 +291,15 @@ def linear_fit(X, Y, process=False, needValue=False):
         else:
             sumExpr = r'\left[%s\right]' % sumExpr
         if sciDigit == 0:
+<<<<<<< HEAD
             latex.add(r'u_a=u_b\sqrt{\cfrac{1}{n}\sum\limits_{i=1}^n %s^2}=%s \times\sqrt{\cfrac{1}{%d}%s}=%s' % (X._NumItem__sym, ub.dlatex(2), n, sumExpr, ua.latex()))
         else:
             latex.add(r'u_a=u_b\sqrt{\cfrac{1}{n}\sum\limits_{i=1}^n %s^2}=%s \times\sqrt{\cfrac{1}{%d}%s}\times 10^{%d}=%s' % (X._NumItem__sym, ub.dlatex(2), n, sumExpr, sciDigit, ua.latex()))
+=======
+            latex.add(r'u_a=u_b\sqrt{\frac{1}{n}\sum\limits_{i=1}^n %s^2}=%s \times\sqrt{\frac{1}{%d}%s}=%s' % (X._NumItem__sym, ub.dlatex(2), n, sumExpr, ua.latex()))
+        else:
+            latex.add(r'u_a=u_b\sqrt{\frac{1}{n}\sum\limits_{i=1}^n %s^2}=%s \times\sqrt{\frac{1}{%d}%s}\times 10^{%d}=%s' % (X._NumItem__sym, ub.dlatex(2), n, sumExpr, sciDigit, ua.latex()))
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
         latex.add(r'综上，拟合结果为')
         latex.add(r'a=%s' % A.latex())
         latex.add(r'b=%s' % B.latex())
@@ -276,4 +307,8 @@ def linear_fit(X, Y, process=False, needValue=False):
             return A, B, latex
         else:
             return latex
+<<<<<<< HEAD
     return A, B
+=======
+    return A, B
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e

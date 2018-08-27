@@ -28,7 +28,10 @@ class BaseMeasure(measure.Measure):
     __q = 1
     __data = None
     __linearfit_data = None
+<<<<<<< HEAD
     useRelUnc = False  #决定由str、latex生成的测量结果中，不确定度是否使用相对不确定度表示
+=======
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
     
     def __init__(self, data, instrument=None, unit=None, sym=None, description=None):
         '''初始化一个BaseMeasure直接测量
@@ -405,7 +408,10 @@ class BaseMeasure(measure.Measure):
         return self.__str__()
     
     def latex(self):
+<<<<<<< HEAD
         unitExpr = format_units_latex(self.__q)
+=======
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
         val = self.value()
         u = self.unc()
         sciDigit = val._Num__sciDigit()
@@ -414,6 +420,7 @@ class BaseMeasure(measure.Measure):
             ur.setIsRelative(True)
             expr = r'%s\left(1 \pm %s\right)%s' % (val.strNoUnit(), ur.dlatex(), unitExpr)
         else:
+<<<<<<< HEAD
             if sciDigit == 0:
                 u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
                 while float(u.strNoUnit()) == 0:
@@ -430,3 +437,15 @@ class BaseMeasure(measure.Measure):
     
     def _repr_latex_(self):
         return r'$\begin{align}%s\end{align}$' % self.latex()
+=======
+            val *= 10**(-sciDigit)
+            u *= 10**(-sciDigit)
+            u._Num__setDigit(val._Num__d_front, val._Num__d_behind, val._Num__d_valid)
+            while float(u.strNoUnit()) == 0:
+                u.remainOneMoreDigit()
+            expr = r'\left(%s \pm %s\right)\times 10^{%d}%s' % (val.strNoUnit(), u.strNoUnit(), sciDigit, unitExpr)
+        return expr
+    
+    def _repr_latex_(self):
+        return r'$\begin{align}%s\end{align}$' % self.latex()
+>>>>>>> fcd8aeb38c983d9242fa950ef4c982492c7b950e
