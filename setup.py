@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/xingrongtech/analyticlab",
-    install_requires = ['numpy', 'scipy', 'sympy', 'quantities'],
+    install_requires = ['numpy', 'scipy', 'sympy', 'quantities>=0.12.1'],
     keywords=['calculation', 'analysis', 'measure', 'uncertainty', 'display'],
     packages=['analyticlab', 'analyticlab.lookup', 
               'analyticlab.system', 'analyticlab.measure'],
